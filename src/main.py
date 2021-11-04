@@ -1,6 +1,4 @@
 import pygame
-import sys
-import os
 
 from app import App
 

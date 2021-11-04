@@ -1,18 +1,27 @@
 import pygame
 import os
 
+import app
+
 from abc import ABC, abstractmethod
 
 from utilities.direction import Direction
 
 
 class AnimatedSprite(ABC):
+    FRAMES_CHANGED_PER_SECOND = 12
+
     def __init__(self):
+        self._since_last_frame_change = 0
         self._amount_of_frames = 0
         self._frame_idx = 0
         
-    def next_frame(self) -> None:
-        self._frame_idx = (self._frame_idx + 1) % self._amount_of_frames
+    def _next_frame(self) -> None:
+        self._since_last_frame_change = (self._since_last_frame_change + 1) % \
+                                        (app.App.FPS // AnimatedSprite.FRAMES_CHANGED_PER_SECOND)
+        
+        if self._since_last_frame_change == 0:
+            self._frame_idx = (self._frame_idx + 1) % self._amount_of_frames
 
     @staticmethod
     def _load(sprite_path) -> list[pygame.Surface]:
@@ -67,7 +76,7 @@ class SingleDirectionAnimatedSprite(AnimatedSprite):
 
         current_frame = self._frames[self._frame_idx]
         if change_frame:
-            self.next_frame
+            self._next_frame()
         return current_frame
 
     @classmethod
@@ -107,7 +116,7 @@ class TwoDirectionAnimatedSprite(AnimatedSprite):
             current_frame = self._rev_frames[self._frame_idx]
 
         if change_frame:
-            self.next_frame()
+            self._next_frame()
 
         return current_frame
 
@@ -160,7 +169,7 @@ class FourDirectionAnimatedSprite(AnimatedSprite):
             raise ValueError(f'Invalid direction value: {direction}')
 
         if change_frame:
-            self.next_frame()
+            self._next_frame()
 
         return current_frame
 
