@@ -1,6 +1,14 @@
 import pygame
+import sys
+import os
 
 from app import App
+
+
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
 
 
 def main():
@@ -15,4 +23,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from app.themes import Theme
+    print(Theme.get_available())
     main()

@@ -8,3 +8,7 @@ __pycache__/
 pyvenv.cfg
 Lib/
 Scripts/
+
+# Pyinstaller
+main.spec
+build/
