@@ -1,6 +1,6 @@
 import os
 
-from main import resource_path
+import app
 from app.themes.sprite import *
 
 
@@ -50,7 +50,7 @@ class Theme:
             from Theme.get_available
         """
 
-        theme_root = resource_path(os.path.join(Theme.PATH, theme_name))
+        theme_root = app.resource_path(os.path.join(Theme.PATH, theme_name))
         if not os.path.exists(theme_root):
             raise FileNotFoundError(f'Theme "{theme_name}" cannot be found')
 
@@ -72,7 +72,7 @@ class Theme:
     def get_available() -> list[str]:
         """Returns list of themes from /themes folder"""
 
-        return os.listdir(resource_path(Theme.PATH))
+        return os.listdir(app.resource_path(Theme.PATH))
 
     @property
     def dot(self) -> list[AnimatedSprite]:

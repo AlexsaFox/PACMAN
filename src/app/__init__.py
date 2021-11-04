@@ -1,9 +1,17 @@
 import pygame
+import sys
+import os
 
 from app.states import AppState
 from app.states.loading import Loading
+from app.themes import Theme
 from utilities.color import *
 
+
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
 
 class App:
     # Constants
@@ -20,6 +28,7 @@ class App:
         self.screen = pygame.display.set_mode(App.DEFAULT_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
+        self.theme = Theme.load_theme(Theme.get_available()[0])
         self.state: AppState = Loading()
         self.bg_color = App.BG_COLOR
 
