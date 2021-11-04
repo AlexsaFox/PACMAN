@@ -5,9 +5,7 @@
 __pycache__/
 
 # Virtual environment 
-pyvenv.cfg
-Lib/
-Scripts/
+venv/
 
 # Pyinstaller
 main.spec
