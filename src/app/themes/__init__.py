@@ -1,6 +1,5 @@
 import os
 
-import app
 from app.themes.sprite import *
 
 
@@ -75,41 +74,41 @@ class Theme:
         return os.listdir(app.resource_path(Theme.PATH))
 
     @property
-    def dot(self) -> list[AnimatedSprite]:
+    def dot(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("dot")
 
     @property
-    def enemy(self) -> list[AnimatedSprite]:
+    def enemy(self) -> list[FourDirectionAnimatedSprite]:
         return self._sprites.get("enemy")
 
     @property
-    def enemy_scare(self) -> list[AnimatedSprite]:
+    def enemy_scare(self) -> list[FourDirectionAnimatedSprite]:
         return self._sprites.get("enemy_scare")
 
     @property
-    def energizer(self) -> list[AnimatedSprite]:
+    def energizer(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("energizer")
 
     @property
-    def floor(self) -> list[AnimatedSprite]:
+    def floor(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("floor")
 
     @property
-    def fruit(self) -> list[AnimatedSprite]:
+    def fruit(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("fruit")
 
     @property
-    def ghost_box_exists(self) -> list[AnimatedSprite]:
-        return self._sprites.get("ghost_box_exists")
+    def ghost_box_exit(self) -> list[TwoDirectionAnimatedSprite]:
+        return self._sprites.get("ghost_box_exit")
 
     @property
-    def player(self) -> list[AnimatedSprite]:
+    def player(self) -> list[FourDirectionAnimatedSprite]:
         return self._sprites.get("player")
 
     @property
-    def top_corner(self) -> list[AnimatedSprite]:
+    def top_corner(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("top_corner")
 
     @property
-    def wall(self) -> list[AnimatedSprite]:
+    def wall(self) -> list[TwoDirectionAnimatedSprite]:
         return self._sprites.get("wall")

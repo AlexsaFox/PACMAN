@@ -1,10 +1,8 @@
 import pygame
 import os
-
 import app
 
 from abc import ABC, abstractmethod
-
 from utilities.direction import Direction
 
 
@@ -32,7 +30,7 @@ class AnimatedSprite(ABC):
         i = 0
         frame_path = os.path.join(sprite_path, f"{i}.png")
         while os.path.exists(frame_path):
-            img = pygame.image.load(frame_path)
+            img = pygame.image.load(frame_path).convert_alpha()
             frames.append(img)
             
             i += 1
@@ -46,12 +44,12 @@ class AnimatedSprite(ABC):
         return frames
 
     @abstractmethod
-    def frame(self, change_frame=True):
+    def frame(self, change_frame=True) -> pygame.Surface:
         pass
 
     @classmethod
     @abstractmethod
-    def load(cls, sprite_path):
+    def load(cls, sprite_path) -> None:
         pass
 
 

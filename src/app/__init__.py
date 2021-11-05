@@ -4,6 +4,7 @@ import os
 
 from app.states import AppState
 from app.states.loading import Loading
+from app.states.game import Game
 from app.themes import Theme
 from utilities.color import *
 
@@ -16,8 +17,8 @@ def resource_path(relative):
 class App:
     # Constants
     WINDOW_CAPTION = "Pac-man"
-    FPS = 60
-    DEFAULT_SIZE = 800, 600
+    FPS = 30
+    DEFAULT_SIZE = 1800, 1000
 
     # Default values for fields of App instance
     BG_COLOR = Color.BLACK
@@ -29,7 +30,7 @@ class App:
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
         self.theme = Theme.load_theme(Theme.get_available()[0])
-        self.state: AppState = Loading()
+        self.state: AppState = Game(self)
         self.bg_color = App.BG_COLOR
 
     @property
