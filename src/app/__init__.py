@@ -17,8 +17,8 @@ def resource_path(relative):
 class App:
     # Constants
     WINDOW_CAPTION = "Pac-man"
-    FPS = 30
-    DEFAULT_SIZE = 1800, 1000
+    FPS = 60
+    DEFAULT_SIZE = 1920, 900
 
     # Default values for fields of App instance
     BG_COLOR = Color.BLACK
@@ -54,7 +54,7 @@ class App:
         elif event.type == pygame.VIDEORESIZE:
             size = event.w, event.h
             self.screen = pygame.display.set_mode(size, pygame.RESIZABLE)
-        elif event.type == pygame.KEYDOWN:
+        else:
             self.state.handle_event(event)
 
         self.state.update()

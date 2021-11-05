@@ -1,3 +1,5 @@
+import pygame
+
 from app.states import AppState
 from app.states.game.maze import Maze
 
@@ -6,6 +8,9 @@ class Game(AppState):
     def __init__(self, app):
         super().__init__(app)
         self.maze = Maze.classic(self)
+
+        w, h = self.app.screen.get_size()
+        self.screen_center = (w/2, h/2)
 
     def _draw_maze_cell(self, coords: tuple[int, int]):
         screen = self.app.screen
@@ -20,10 +25,8 @@ class Game(AppState):
 
     def draw(self):
         min_side = min(self.maze.width_in_cells, self.maze.height_in_cells)
-
-        screen = self.app.screen
-        screen_size = screen.get_size()
         
+        # TODO Draw only nesseccary cells
 
         for i in range(min_side):
             for j in range(i):
@@ -33,4 +36,10 @@ class Game(AppState):
 
 
     def handle_event(self, event):
-        ...
+        pressed = pygame.key.get_pressed()
+
+        x, y = self.screen_center
+        dx = 25 * (pressed[pygame.K_a] - pressed[pygame.K_d])
+        dy = 25 * (pressed[pygame.K_w] - pressed[pygame.K_s])
+
+        self.screen_center = (x + dx, y + dy)

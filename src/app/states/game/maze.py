@@ -6,13 +6,15 @@ import os
 from itertools import combinations
 from random import choice
 from typing import Union, TYPE_CHECKING
-from app.themes.sprite_sizes import CELL_WIDTH, CELL_HEIGHT
 
 if TYPE_CHECKING:
     from app.states.game import Game
 
 
 class MazeCell:
+    CELL_WIDTH = 192
+    CELL_HEIGHT = 96
+
     def __init__(self, maze: Maze, **kwargs):
         # Reference to maze with this cell
         self.maze = maze
@@ -115,14 +117,7 @@ class MazeCell:
                   self.maze.grid[rel_y][rel_x + 1].is_wall and \
                   self.maze.grid[rel_y - 1][rel_x + 1].is_wall)
 
-            # Draw walls and corners in order
-            if ne and nw:
-                ne = nw = False
-                wall_frame = self.wall_sprite.frame(reversed_=False)
-                pos = wall_frame.get_rect(midbottom=(abs_x + CELL_WIDTH/8, 
-                                                     abs_y + CELL_HEIGHT/4))
-                screen.blit(wall_frame, pos)
-
+            # Draw walls in order
             if nw:
                 nw = False
                 corner_frame = self.corner_sprite.frame()
@@ -132,42 +127,21 @@ class MazeCell:
             if ne:
                 nw = False
                 corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x + CELL_WIDTH/4, 
-                                                       abs_y + CELL_HEIGHT/4))
+                pos = corner_frame.get_rect(midbottom=(abs_x + MazeCell.CELL_WIDTH/4, 
+                                                       abs_y + MazeCell.CELL_HEIGHT/4))
                 screen.blit(corner_frame, pos)
-
-            if se and sw:
-                se = sw = False
-                wall_frame = self.wall_sprite.frame(reversed_=False)
-                pos = wall_frame.get_rect(midbottom=(abs_x - CELL_WIDTH/8, 
-                                                     abs_y + CELL_HEIGHT/2))
-                screen.blit(wall_frame, pos)
 
             if sw:
                 nw = False
                 corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x - CELL_WIDTH/4, 
-                                                       abs_y + CELL_HEIGHT/4))
+                pos = corner_frame.get_rect(midbottom=(abs_x - MazeCell.CELL_WIDTH/4, 
+                                                       abs_y + MazeCell.CELL_HEIGHT/4))
                 screen.blit(corner_frame, pos)
-
-            if nw and sw:
-                nw = sw = False
-                wall_frame = self.wall_sprite.frame(reversed_=True)
-                pos = wall_frame.get_rect(midbottom=(abs_x - CELL_WIDTH/8, 
-                                                     abs_y + CELL_HEIGHT/4))
-                screen.blit(wall_frame, pos)
-
-            if ne and se:
-                ne = se = False
-                wall_frame = self.wall_sprite.frame(reversed_=True)
-                pos = wall_frame.get_rect(midbottom=(abs_x + CELL_WIDTH/8, 
-                                                     abs_y + CELL_HEIGHT/2))
-                screen.blit(wall_frame, pos)
 
             if se:
                 corner_frame = self.corner_sprite.frame()
                 pos = corner_frame.get_rect(midbottom=(abs_x, 
-                                                       abs_y + CELL_HEIGHT/2))
+                                                       abs_y + MazeCell.CELL_HEIGHT/2))
                 screen.blit(corner_frame, pos)
 
         # Display dot
@@ -181,6 +155,7 @@ class MazeCell:
             energizer_frame = self.energizer_sprite.frame()
             pos = energizer_frame.get_rect(center=abs_coords)
             screen.blit(energizer_frame, pos)
+
 
 class Maze:
     LEVEL_PATH = 'levels'
@@ -211,25 +186,24 @@ class Maze:
 
     @property
     def width(self):
-        return CELL_WIDTH * max(self.width_in_cells, self.height_in_cells)
+        return MazeCell.CELL_WIDTH * max(self.width_in_cells, self.height_in_cells)
 
     @property
     def height(self):
-        return CELL_HEIGHT * max(self.width_in_cells, self.height_in_cells)
+        return MazeCell.CELL_HEIGHT * max(self.width_in_cells, self.height_in_cells)
 
     @property
     def ne_corner(self) -> tuple[int, int]:
-        w, h = self.game.app.screen.get_size()
-        return w/2, h/2 - self.height/2
+        x, y = self.game.screen_center
+        return x, y - self.height/2
 
     # Drawing cells to screen
     def _get_cell_center(self, rel_coords: tuple[int, int]) -> tuple[int, int]:
-        screen_size = self.game.app.screen.get_size()
         x, y = self.ne_corner
         rel_y, rel_x = rel_coords
 
-        x += CELL_WIDTH/2 * (rel_x - rel_y)
-        y += CELL_HEIGHT/2 * (rel_x + rel_y)
+        x += MazeCell.CELL_WIDTH/2 * (rel_x - rel_y)
+        y += MazeCell.CELL_HEIGHT/2 * (rel_x + rel_y)
 
         return (x, y)
 
