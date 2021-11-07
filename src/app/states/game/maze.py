@@ -73,87 +73,78 @@ class MazeCell:
             raise ValueError('Invalid maze cell')
 
     # Displaying cell on screen
-    def draw(self, rel_coords: tuple[int, int], abs_coords: tuple[int, int]):
+    def draw(self, mz_coords: tuple[int, int], screen_coords: tuple[int, int]):
         """ Displays cell to screen in specified coordinates
 
         Args:
             abs_coords (tuple[int, int]): Coordinates of the cell in maze grid
-            abs_coords (tuple[int, int]): Coordinates of the cell center
+            screen_coords (tuple[int, int]): Coordinates of the cell center on screen surface
         """        
 
         screen = self.maze.game.app.screen
-        rel_y, rel_x = rel_coords
-        abs_x, abs_y = abs_coords
+        mz_x, mz_y = mz_coords
+        sc_x, sc_y = screen_coords
         
         # Display floor 
         floor_frame = self.floor_sprite.frame()
-        pos = floor_frame.get_rect(center=abs_coords)
+        pos = floor_frame.get_rect(center=screen_coords)
         screen.blit(floor_frame, pos)
 
         # Display wall according to surroundings
         if self.is_wall:
             # Check each corner if it needs wall
-            nw = rel_x == 0 or \
-                 rel_y == 0 or \
-                 (self.maze.grid[rel_y - 1][rel_x].is_wall and \
-                  self.maze.grid[rel_y][rel_x - 1].is_wall and \
-                  self.maze.grid[rel_y - 1][rel_x - 1].is_wall)
+            nw = mz_x == 0 or \
+                 mz_y == 0 or \
+                 (self.maze.grid[mz_y - 1][mz_x].is_wall and \
+                  self.maze.grid[mz_y][mz_x - 1].is_wall and \
+                  self.maze.grid[mz_y - 1][mz_x - 1].is_wall)
 
-            sw = rel_x == 0 or \
-                 rel_y == self.maze.height_in_cells - 1 or \
-                 (self.maze.grid[rel_y + 1][rel_x].is_wall and \
-                  self.maze.grid[rel_y][rel_x - 1].is_wall and \
-                  self.maze.grid[rel_y + 1][rel_x - 1].is_wall)
+            sw = mz_x == 0 or \
+                 mz_y == self.maze.height_in_cells - 1 or \
+                 (self.maze.grid[mz_y + 1][mz_x].is_wall and \
+                  self.maze.grid[mz_y][mz_x - 1].is_wall and \
+                  self.maze.grid[mz_y + 1][mz_x - 1].is_wall)
 
-            se = rel_x == self.maze.width_in_cells - 1 or \
-                 rel_y == self.maze.height_in_cells - 1 or \
-                 (self.maze.grid[rel_y + 1][rel_x].is_wall and \
-                  self.maze.grid[rel_y][rel_x + 1].is_wall and \
-                  self.maze.grid[rel_y + 1][rel_x + 1].is_wall)
+            se = mz_x == self.maze.width_in_cells - 1 or \
+                 mz_y == self.maze.height_in_cells - 1 or \
+                 (self.maze.grid[mz_y + 1][mz_x].is_wall and \
+                  self.maze.grid[mz_y][mz_x + 1].is_wall and \
+                  self.maze.grid[mz_y + 1][mz_x + 1].is_wall)
 
-            ne = rel_x == self.maze.width_in_cells - 1 or \
-                 rel_y == 0 or \
-                 (self.maze.grid[rel_y - 1][rel_x].is_wall and \
-                  self.maze.grid[rel_y][rel_x + 1].is_wall and \
-                  self.maze.grid[rel_y - 1][rel_x + 1].is_wall)
+            ne = mz_x == self.maze.width_in_cells - 1 or \
+                 mz_y == 0 or \
+                 (self.maze.grid[mz_y - 1][mz_x].is_wall and \
+                  self.maze.grid[mz_y][mz_x + 1].is_wall and \
+                  self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
 
             # Draw walls in order
+            corner_frame = self.corner_sprite.frame()
             if nw:
-                nw = False
-                corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x, abs_y))
+                pos = corner_frame.get_rect(midbottom=(sc_x, sc_y))
                 screen.blit(corner_frame, pos)
-
             if ne:
-                nw = False
-                corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x + MazeCell.CELL_WIDTH/4, 
-                                                       abs_y + MazeCell.CELL_HEIGHT/4))
+                pos = corner_frame.get_rect(midbottom=(sc_x + MazeCell.CELL_WIDTH/4, 
+                                                       sc_y + MazeCell.CELL_HEIGHT/4))
                 screen.blit(corner_frame, pos)
-
             if sw:
-                nw = False
-                corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x - MazeCell.CELL_WIDTH/4, 
-                                                       abs_y + MazeCell.CELL_HEIGHT/4))
+                pos = corner_frame.get_rect(midbottom=(sc_x - MazeCell.CELL_WIDTH/4, 
+                                                       sc_y + MazeCell.CELL_HEIGHT/4))
                 screen.blit(corner_frame, pos)
-
             if se:
-                corner_frame = self.corner_sprite.frame()
-                pos = corner_frame.get_rect(midbottom=(abs_x, 
-                                                       abs_y + MazeCell.CELL_HEIGHT/2))
+                pos = corner_frame.get_rect(midbottom=(sc_x, 
+                                                       sc_y + MazeCell.CELL_HEIGHT/2))
                 screen.blit(corner_frame, pos)
 
         # Display dot
         if self.has_dot:
             dot_frame = self.dot_sprite.frame()
-            pos = dot_frame.get_rect(center=abs_coords)
+            pos = dot_frame.get_rect(center=screen_coords)
             screen.blit(dot_frame, pos)
             
         # Display energizer
         if self.has_energizer:
             energizer_frame = self.energizer_sprite.frame()
-            pos = energizer_frame.get_rect(center=abs_coords)
+            pos = energizer_frame.get_rect(center=screen_coords)
             screen.blit(energizer_frame, pos)
 
 
@@ -168,6 +159,7 @@ class Maze:
             Maze.from_int_grid(cls, game, grid_nums)
             Maze.classic(cls, game)
         """
+
         self.grid: list[list[MazeCell]] = []
         self.game: Union[Game, None] = None
         pass
@@ -194,30 +186,42 @@ class Maze:
 
     @property
     def ne_corner(self) -> tuple[int, int]:
-        x, y = self.game.screen_center
-        return x, y - self.height/2
+        """ Position on the screen of the cell center
+        in north-east corner of the maze 
+        """
+
+        sc_w, sc_h = self.game.app.screen.get_size()
+        cam_x, cam_y = self.game.camera_center
+
+        return sc_w/2 - cam_x, sc_h/2 - cam_y
 
     # Drawing cells to screen
-    def _get_cell_center(self, rel_coords: tuple[int, int]) -> tuple[int, int]:
-        x, y = self.ne_corner
-        rel_y, rel_x = rel_coords
+    def _get_cell_center(self, mz_coords: tuple[int, int]) -> tuple[int, int]:
+        sc_x, sc_y = self.ne_corner
+        mz_x, mz_y = mz_coords
 
-        x += MazeCell.CELL_WIDTH/2 * (rel_x - rel_y)
-        y += MazeCell.CELL_HEIGHT/2 * (rel_x + rel_y)
+        sc_x += MazeCell.CELL_WIDTH/2 * (mz_x - mz_y)
+        sc_y += MazeCell.CELL_HEIGHT/2 * (mz_x + mz_y)
 
-        return (x, y)
+        return sc_x, sc_y
 
-    def draw_cell(self, rel_coords: tuple[int, int]) -> None:
-        y, x = rel_coords
-        abs_coords = self._get_cell_center(rel_coords)
-        self.grid[y][x].draw(rel_coords, abs_coords)
+    def draw_cell(self, mz_coords: tuple[int, int]) -> None:
+        """ Draws specified maze cell """
+        mz_x, mz_y = mz_coords
 
-    # Loading existing mazes from files  
+        if mz_x < 0 or mz_x >= self.width_in_cells or \
+            mz_y < 0 or mz_y >= self.height_in_cells:
+            return
+
+        on_screen_coords = self._get_cell_center(mz_coords)
+        self.grid[mz_y][mz_x].draw(mz_coords, on_screen_coords)
+
+    # Loading existing mazes from files
     @staticmethod
     def _load_level_csv(level_name) -> list[list[int]]:
         path = os.path.join(Maze.LEVEL_PATH, level_name)
         if not os.path.exists(path):
-            raise FileNotFoundError(f"Path {path} doesn't exist")
+            raise FileNotFoundError(f"Level file at {path} doesn't exist")
 
         grid = []
         with open(path, 'r') as f:

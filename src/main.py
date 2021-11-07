@@ -11,8 +11,7 @@ def main():
         clock.tick(app.FPS)
 
         # TODO: Clear this
-        __import__('os').system('cls')
-        print(clock.get_fps())
+        print('FPS:', clock.get_fps())
 
         for event in pygame.event.get():
             app.handle_event(event)
