@@ -34,7 +34,6 @@ class MazeCell:
         theme = self.maze.game.app.theme
         self.floor_sprite = choice(theme.floor)
         self.wall_sprite = choice(theme.wall)
-        self.corner_sprite = choice(theme.top_corner)
         self.dot_sprite = choice(theme.dot)
         self.energizer_sprite = choice(theme.energizer)
         self.ghost_box_exit = choice(theme.ghost_box_exit)
@@ -118,22 +117,22 @@ class MazeCell:
                   self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
 
             # Draw walls in order
-            corner_frame = self.corner_sprite.frame()
+            wall_frame = self.wall_sprite.frame()
             if nw:
-                pos = corner_frame.get_rect(midbottom=(sc_x, sc_y))
-                screen.blit(corner_frame, pos)
+                pos = wall_frame.get_rect(midbottom=(sc_x, sc_y))
+                screen.blit(wall_frame, pos)
             if ne:
-                pos = corner_frame.get_rect(midbottom=(sc_x + MazeCell.CELL_WIDTH/4, 
-                                                       sc_y + MazeCell.CELL_HEIGHT/4))
-                screen.blit(corner_frame, pos)
+                pos = wall_frame.get_rect(midbottom=(sc_x + MazeCell.CELL_WIDTH/4, 
+                                                     sc_y + MazeCell.CELL_HEIGHT/4))
+                screen.blit(wall_frame, pos)
             if sw:
-                pos = corner_frame.get_rect(midbottom=(sc_x - MazeCell.CELL_WIDTH/4, 
-                                                       sc_y + MazeCell.CELL_HEIGHT/4))
-                screen.blit(corner_frame, pos)
+                pos = wall_frame.get_rect(midbottom=(sc_x - MazeCell.CELL_WIDTH/4, 
+                                                     sc_y + MazeCell.CELL_HEIGHT/4))
+                screen.blit(wall_frame, pos)
             if se:
-                pos = corner_frame.get_rect(midbottom=(sc_x, 
-                                                       sc_y + MazeCell.CELL_HEIGHT/2))
-                screen.blit(corner_frame, pos)
+                pos = wall_frame.get_rect(midbottom=(sc_x, 
+                                                     sc_y + MazeCell.CELL_HEIGHT/2))
+                screen.blit(wall_frame, pos)
 
         # Display dot
         if self.has_dot:

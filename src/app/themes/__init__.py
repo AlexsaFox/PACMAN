@@ -14,8 +14,7 @@ class Theme:
         "fruit": SingleDirectionAnimatedSprite,
         "ghost_box_exit": TwoDirectionAnimatedSprite,
         "player": FourDirectionAnimatedSprite,
-        "top_corner": SingleDirectionAnimatedSprite,
-        "wall": TwoDirectionAnimatedSprite,
+        "wall": SingleDirectionAnimatedSprite,
     }
 
     def __init__(self, sprites: dict[str, list[AnimatedSprite]]):
@@ -106,9 +105,5 @@ class Theme:
         return self._sprites.get("player")
 
     @property
-    def top_corner(self) -> list[SingleDirectionAnimatedSprite]:
-        return self._sprites.get("top_corner")
-
-    @property
-    def wall(self) -> list[TwoDirectionAnimatedSprite]:
+    def wall(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("wall")
