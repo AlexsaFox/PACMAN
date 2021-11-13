@@ -4,7 +4,7 @@ import csv
 import os
 
 from itertools import combinations
-from random import choice
+from random import choice, randrange
 from typing import Union, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -33,10 +33,23 @@ class MazeCell:
         # Get sprites
         theme = self.maze.game.app.theme
         self.floor_sprite = choice(theme.floor)
-        self.wall_sprite = choice(theme.wall)
-        self.dot_sprite = choice(theme.dot)
-        self.energizer_sprite = choice(theme.energizer)
-        self.ghost_box_exit = choice(theme.ghost_box_exit)
+        self.floor_frame_idx = randrange(0, self.floor_sprite.amount)
+
+        if self.is_wall:
+            self.wall_sprite = choice(theme.wall)
+            self.wall_sprite_idx = randrange(0, self.wall_sprite.amount)
+
+        if self.has_dot:
+            self.dot_sprite = choice(theme.dot)
+            self.dot_frame_idx = randrange(0, self.dot_sprite.amount)
+
+        if self.has_energizer:
+            self.energizer_sprite = choice(theme.energizer)
+            self.energizer_frame_idx = randrange(0, self.energizer_sprite.amount)
+
+        if self.is_ghost_box_exit:
+            self.ghost_box_exit = choice(theme.ghost_box_exit)
+            self.ghost_box_frame_idx = randrange(0, self.ghost_box_exit.amount)
 
     # Creating and validating cell
     @classmethod
@@ -85,7 +98,8 @@ class MazeCell:
         sc_x, sc_y = screen_coords
         
         # Display floor 
-        floor_frame = self.floor_sprite.frame()
+        floor_frame = self.floor_sprite.frame(self.floor_frame_idx)
+        self.floor_frame_idx = (self.floor_frame_idx + 1) % self.floor_sprite.amount
         pos = floor_frame.get_rect(center=screen_coords)
         screen.blit(floor_frame, pos)
 
@@ -117,7 +131,8 @@ class MazeCell:
                   self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
 
             # Draw walls in order
-            wall_frame = self.wall_sprite.frame()
+            wall_frame = self.wall_sprite.frame(self.wall_sprite_idx)
+            self.wall_sprite_idx = (self.wall_sprite_idx + 1) % self.wall_sprite.amount
             if nw:
                 pos = wall_frame.get_rect(midbottom=(sc_x, sc_y))
                 screen.blit(wall_frame, pos)
@@ -136,13 +151,15 @@ class MazeCell:
 
         # Display dot
         if self.has_dot:
-            dot_frame = self.dot_sprite.frame()
+            dot_frame = self.dot_sprite.frame(self.dot_frame_idx)
+            self.dot_frame_idx = (self.dot_frame_idx + 1) % self.dot_sprite.amount
             pos = dot_frame.get_rect(center=screen_coords)
             screen.blit(dot_frame, pos)
             
         # Display energizer
         if self.has_energizer:
-            energizer_frame = self.energizer_sprite.frame()
+            energizer_frame = self.energizer_sprite.frame(self.energizer_frame_idx)
+            self.energizer_frame_idx = (self.energizer_frame_idx + 1) % self.energizer_sprite.amount
             pos = energizer_frame.get_rect(center=screen_coords)
             screen.blit(energizer_frame, pos)
 
