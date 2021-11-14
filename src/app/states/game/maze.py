@@ -173,12 +173,12 @@ class Maze:
 
         Use these instead:
             Maze.from_int_grid(cls, game, grid_nums)
-            Maze.classic(cls, game)
+            Maze.powershell
+            classic(cls, game)
         """
 
         self.grid: list[list[MazeCell]] = []
         self.game: Union[Game, None] = None
-        pass
 
     def _validate(self):
         ...
@@ -212,7 +212,7 @@ class Maze:
         return sc_w/2 - cam_x, sc_h/2 - cam_y
 
     # Drawing cells to screen
-    def _get_cell_center(self, mz_coords: tuple[int, int]) -> tuple[int, int]:
+    def get_cell_center(self, mz_coords: tuple[int, int]) -> tuple[int, int]:
         sc_x, sc_y = self.ne_corner
         mz_x, mz_y = mz_coords
 
@@ -229,7 +229,7 @@ class Maze:
             mz_y < 0 or mz_y >= self.height_in_cells:
             return
 
-        on_screen_coords = self._get_cell_center(mz_coords)
+        on_screen_coords = self.get_cell_center(mz_coords)
         self.grid[mz_y][mz_x].draw(mz_coords, on_screen_coords)
 
     # Loading existing mazes from files
