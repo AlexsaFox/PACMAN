@@ -102,24 +102,6 @@ class Game(AppState):
             # Also change boolean values that are checked if needed
             change_state()
 
-        # Temporary
-        # Display characters 
-        direction = Direction.NORTH
-        pacman = self.app.theme.player[0].frame(direction)
-        enemy0 = self.app.theme.enemy[0].frame(direction)
-        enemy1 = self.app.theme.enemy[1].frame(direction)
-        enemy2 = self.app.theme.enemy[2].frame(direction)
-        enemy3 = self.app.theme.enemy[3].frame(direction)
-        enemy_scare = self.app.theme.enemy_scare[0].frame(direction)
-        SPRITE_WIDTH = 120
-
-        self.app.screen.blit(pacman, pacman.get_rect(center=(sc_w/2 - SPRITE_WIDTH * 5/2, sc_h/2)))
-        self.app.screen.blit(enemy0, enemy0.get_rect(center=(sc_w/2 - SPRITE_WIDTH * 3/2, sc_h/2)))
-        self.app.screen.blit(enemy1, enemy1.get_rect(center=(sc_w/2 - SPRITE_WIDTH * 1/2, sc_h/2)))
-        self.app.screen.blit(enemy2, enemy2.get_rect(center=(sc_w/2 + SPRITE_WIDTH * 1/2, sc_h/2)))
-        self.app.screen.blit(enemy3, enemy3.get_rect(center=(sc_w/2 + SPRITE_WIDTH * 3/2, sc_h/2)))
-        self.app.screen.blit(enemy_scare, enemy_scare.get_rect(center=(sc_w/2 + SPRITE_WIDTH * 5/2, sc_h/2)))
-
     def handle_event(self, event):
         pressed = pygame.key.get_pressed()
 

@@ -15,13 +15,6 @@ class AppState(ABC):
     def draw(self) -> None:
         pass
 
-    def move(self) -> None:
-        pass
-
-    def update(self) -> None:
-        self.move()
-        self.draw()
-
     @abstractmethod
     def handle_event(self, event) -> None:
         pass
