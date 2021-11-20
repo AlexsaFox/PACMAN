@@ -1,21 +1,27 @@
 import pygame
 
+from random import choice
 from math import ceil
 
 from app.states import AppState
 from app.states.game.maze import Maze, MazeCell
+from app.states.game.pacman import Pacman
 from utilities.direction import Direction
 
 
 class Game(AppState):
     def __init__(self, app):
         super().__init__(app)
+
         self.maze = Maze.classic(self)
-        
-        # Camera center. Cemter of cell in
-        # northeast corner of maze is taken as (0, 0)
-        self.camera_center = 0, self.maze.height/2 - MazeCell.CELL_HEIGHT/2     # Placeholder, center of maze
-                                                                                # Should be pacman start location
+
+        start_mz_x, start_mz_y = self.maze.pacman_start
+        cam_abs_x = MazeCell.CELL_WIDTH/2 * (start_mz_x - start_mz_y)
+        cam_abs_y = MazeCell.CELL_HEIGHT/2 * (start_mz_x + start_mz_y)
+        self.camera_center = cam_abs_x, cam_abs_y
+        self.pacman = Pacman(game=self, 
+                             start_cell=(start_mz_x, start_mz_y),
+                             sprite=choice(self.app.theme.player))
 
     def draw(self):
         # Get cells in corners of screen
@@ -98,13 +104,25 @@ class Game(AppState):
             # Also change boolean values that are checked if needed
             change_state()
 
-    def handle_event(self, event):
-        pressed = pygame.key.get_pressed()
+        self.pacman.draw()
 
-        mult = 20 if pressed[pygame.K_LSHIFT] else 2
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_w, pygame.K_UP]:
+                self.pacman.change_direction(Direction.N)
+            elif event.key in [pygame.K_e, pygame.K_LEFT]:
+                self.pacman.change_direction(Direction.E)
+            elif event.key in [pygame.K_s, pygame.K_DOWN]:
+                self.pacman.change_direction(Direction.S)
+            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
+                self.pacman.change_direction(Direction.W)
+                
+        # pressed = pygame.key.get_pressed()
 
-        x, y = self.camera_center
-        dx = mult   * (pressed[pygame.K_d] - pressed[pygame.K_a])
-        dy = mult/2 * (pressed[pygame.K_s] - pressed[pygame.K_w])
+        # mult = 20 if pressed[pygame.K_LSHIFT] else 2
 
-        self.camera_center = x + dx, y + dy
+        # x, y = self.camera_center
+        # dx = mult   * (pressed[pygame.K_d] - pressed[pygame.K_a])
+        # dy = mult/2 * (pressed[pygame.K_s] - pressed[pygame.K_w])
+
+        # self.camera_center = x + dx, y + dy

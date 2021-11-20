@@ -36,7 +36,7 @@ class AnimatedSprite(ABC):
         return frames
 
     @abstractmethod
-    def frame(self, idx, change_frame=True) -> pygame.Surface:
+    def frame(self, idx) -> pygame.Surface:
         pass
 
     @classmethod
@@ -53,13 +53,11 @@ class SingleDirectionAnimatedSprite(AnimatedSprite):
         self._frames = frames
         self.amount = len(frames)
 
-    def frame(self, idx: int, change_frame: bool=True) -> pygame.Surface:
+    def frame(self, idx: int) -> pygame.Surface:
         """Returns current frame of sprite
 
         Args:
             idx (int): Index of sprite frame
-            change_frame (bool, optional): Indicates whether frame
-            should be changed. Defaults to True.
 
         Returns:
             pygame.Surface: surface containing current frame image
@@ -85,16 +83,13 @@ class TwoDirectionAnimatedSprite(AnimatedSprite):
 
     def frame(self, 
               idx: int, 
-              reversed_: bool = False, 
-              change_frame: bool = True) -> pygame.Surface:
+              reversed_: bool = False) -> pygame.Surface:
         """Returns current frame of sprite
 
         Args:
             idx (int): Index of sprite frame
             reversed (bool, optional): If True, returns inverted 
             horizontally frame. Defaults to False.
-            change_frame (bool, optional): Indicates whether frame
-            should be changed. Defaults to True.
 
         Returns:
             pygame.Surface: surface containing current frame image
@@ -128,15 +123,12 @@ class FourDirectionAnimatedSprite(AnimatedSprite):
 
     def frame(self, 
               idx: int,
-              direction: int,
-              change_frame: bool=True) -> pygame.Surface:
+              direction: int) -> pygame.Surface:
         """Returns current frame of sprite
 
         Args:
             idx (int): Index of sprite frame
             direction(int): Orientation of sprite
-            change_frame (bool, optional): Indicates whether frame
-            should be changed. Defaults to True.
 
         Returns:
             pygame.Surface: surface containing current frame image
@@ -144,13 +136,13 @@ class FourDirectionAnimatedSprite(AnimatedSprite):
 
         current_frame = None
         if direction == Direction.N:
-            current_frame = self._N_frames[self._frame_idx]
+            current_frame = self._N_frames[idx]
         elif direction == Direction.E:
-            current_frame = self._E_frames[self._frame_idx]
+            current_frame = self._E_frames[idx]
         elif direction == Direction.S:
-            current_frame = self._S_frames[self._frame_idx]
+            current_frame = self._S_frames[idx]
         elif direction == Direction.W:
-            current_frame = self._W_frames[self._frame_idx]
+            current_frame = self._W_frames[idx]
         else:
             raise ValueError(f'Invalid direction value: {direction}')
 

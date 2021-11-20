@@ -17,6 +17,7 @@ def resource_path(relative):
 class App:
     # Constants
     WINDOW_CAPTION = "Pac-man"
+    ANIMATION_FPS = 15
     FPS = 60
     DEFAULT_SIZE = 1920, 900
 

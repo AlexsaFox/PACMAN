@@ -5,10 +5,15 @@ import os
 
 from itertools import combinations
 from random import choice, randrange
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.states.game import Game
+
+
+class InvalidMazeLayoutError(ValueError):
+    def __init__(self, msg="Bad maze layout"):
+        super().__init__(msg)
 
 
 class MazeCell:
@@ -82,24 +87,25 @@ class MazeCell:
         ]
 
         if any(a and b for a, b in combinations(attributes, r=2)):
-            raise ValueError('Invalid maze cell')
+            raise InvalidMazeLayoutError('Invalid maze cell')
 
     # Displaying cell on screen
     def draw(self, mz_coords: tuple[int, int], screen_coords: tuple[int, int]):
         """ Displays cell to screen in specified coordinates
 
         Args:
-            abs_coords (tuple[int, int]): Coordinates of the cell in maze grid
+            mz_coords (tuple[int, int]): Coordinates of the cell in maze grid
             screen_coords (tuple[int, int]): Coordinates of the cell center on screen surface
         """        
+        game_frames_per_sprite_frame = self.maze.game.app.FPS // self.maze.game.app.ANIMATION_FPS
 
         screen = self.maze.game.app.screen
         mz_x, mz_y = mz_coords
         sc_x, sc_y = screen_coords
         
         # Display floor 
-        floor_frame = self.floor_sprite.frame(self.floor_frame_idx)
-        self.floor_frame_idx = (self.floor_frame_idx + 1) % self.floor_sprite.amount
+        floor_frame = self.floor_sprite.frame(self.floor_frame_idx // game_frames_per_sprite_frame)
+        self.floor_frame_idx = (self.floor_frame_idx + 1) % (self.floor_sprite.amount * game_frames_per_sprite_frame)
         pos = floor_frame.get_rect(center=screen_coords)
         screen.blit(floor_frame, pos)
 
@@ -131,8 +137,8 @@ class MazeCell:
                   self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
 
             # Draw walls in order
-            wall_frame = self.wall_sprite.frame(self.wall_sprite_idx)
-            self.wall_sprite_idx = (self.wall_sprite_idx + 1) % self.wall_sprite.amount
+            wall_frame = self.wall_sprite.frame(self.wall_sprite_idx // game_frames_per_sprite_frame)
+            self.wall_sprite_idx = (self.wall_sprite_idx + 1) % (self.wall_sprite.amount * game_frames_per_sprite_frame)
             if nw:
                 pos = wall_frame.get_rect(midbottom=(sc_x, sc_y))
                 screen.blit(wall_frame, pos)
@@ -151,15 +157,15 @@ class MazeCell:
 
         # Display dot
         if self.has_dot:
-            dot_frame = self.dot_sprite.frame(self.dot_frame_idx)
-            self.dot_frame_idx = (self.dot_frame_idx + 1) % self.dot_sprite.amount
+            dot_frame = self.dot_sprite.frame(self.dot_frame_idx // game_frames_per_sprite_frame)
+            self.dot_frame_idx = (self.dot_frame_idx + 1) % (self.dot_sprite.amount * game_frames_per_sprite_frame)
             pos = dot_frame.get_rect(center=screen_coords)
             screen.blit(dot_frame, pos)
             
         # Display energizer
         if self.has_energizer:
-            energizer_frame = self.energizer_sprite.frame(self.energizer_frame_idx)
-            self.energizer_frame_idx = (self.energizer_frame_idx + 1) % self.energizer_sprite.amount
+            energizer_frame = self.energizer_sprite.frame(self.energizer_frame_idx // game_frames_per_sprite_frame)
+            self.energizer_frame_idx = (self.energizer_frame_idx + 1) % (self.energizer_sprite.amount * game_frames_per_sprite_frame)
             pos = energizer_frame.get_rect(center=screen_coords)
             screen.blit(energizer_frame, pos)
 
@@ -167,21 +173,33 @@ class MazeCell:
 class Maze:
     LEVEL_PATH = 'levels'
 
-    def __init__(self):
-        """ Creates empty maze. Avoid using this
-        unless you know what you're doing. 
+    def __init__(self, game: Game, grid_nums: list[list[int]]):
+        """ Creates maze from grid of numbers
 
-        Use these instead:
-            Maze.from_int_grid(cls, game, grid_nums)
-            Maze.powershell
-            classic(cls, game)
+        Args:
+            game (Game): Game object that created this maze
+            grid_nums (list[list[int]]): Matrix containing numeric description
+            of maze layout
         """
 
-        self.grid: list[list[MazeCell]] = []
-        self.game: Union[Game, None] = None
+        self.game = game
+        self.grid = [[MazeCell.from_number(self, n) for n in line] 
+                    for line in grid_nums]
+
+        self._validate()
 
     def _validate(self):
-        ...
+        # Get pacman spawnpoint and make sure 
+        # there is one and only one of them
+        self._pacman_spawnpoints = []
+        for i, line in enumerate(self.grid):
+            for j, cell in enumerate(line):
+                if cell.is_pacman_spawnpoint:
+                    self._pacman_spawnpoints.append((j, i))
+
+        if self._pacman_spawnpoints is None:
+            raise InvalidMazeLayoutError('No pacman spawnpoint found')
+
 
     # Readonly properties of maze 
     @property
@@ -202,14 +220,21 @@ class Maze:
 
     @property
     def ne_corner(self) -> tuple[int, int]:
-        """ Position on the screen of the cell center
-        in north-east corner of the maze 
+        """ Position on the screen of the center of the 
+        cell in the north-east corner of the maze 
         """
 
         sc_w, sc_h = self.game.app.screen.get_size()
-        cam_x, cam_y = self.game.camera_center
+        cam_abs_x, cam_abs_y = self.game.camera_center
 
-        return sc_w/2 - cam_x, sc_h/2 - cam_y
+        return sc_w/2 - cam_abs_x, sc_h/2 - cam_abs_y
+
+    @property
+    def pacman_start(self):
+        """ Maze coordinates of random pacman spawnpoint 
+        in format of (x, y)
+        """        
+        return choice(self._pacman_spawnpoints)
 
     # Drawing cells to screen
     def get_cell_center(self, mz_coords: tuple[int, int]) -> tuple[int, int]:
@@ -251,26 +276,6 @@ class Maze:
         return grid
 
     @classmethod
-    def from_int_grid(cls, game: Game, grid_nums: list[list[int]]) -> Maze:
-        """ Creates maze from grid of numbers
-
-        Args:
-            game (Game): Game object that created this maze
-            grid_nums (list[list[int]]): Matrix containing numeric description
-            of maze layout
-
-        Returns:
-            Maze: Fully functionable Maze instance
-        """        
-
-        maze = cls()
-        maze.game = game
-        maze.grid = [[MazeCell.from_number(maze, n) for n in line] 
-                    for line in grid_nums]
-        maze._validate()
-        return maze
-
-    @classmethod
     def classic(cls, game: Game) -> Maze:
         grid = cls._load_level_csv('classic.csv')
-        return cls.from_int_grid(game, grid)
+        return Maze(game, grid)
