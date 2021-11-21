@@ -1,6 +1,5 @@
 import pygame
 import os
-import app
 
 from abc import ABC, abstractmethod
 from utilities.direction import Direction

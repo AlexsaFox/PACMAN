@@ -7,7 +7,6 @@ from itertools import combinations
 from random import choice, randrange
 from typing import TYPE_CHECKING
 
-from pygame.constants import GL_RED_SIZE
 
 if TYPE_CHECKING:
     from app.states.game import Game
@@ -209,7 +208,7 @@ class Maze:
         if self._pacman_spawnpoints is None:
             raise InvalidMazeLayoutError('No pacman spawnpoint found')
 
-        # Find all turnable cell
+        # Find all turnable cells
         for i, line in enumerate(self.grid):
             for j, cell in enumerate(line):
                 if not cell.is_wall:
@@ -232,11 +231,11 @@ class Maze:
     # Readonly properties of maze 
     @property
     def width_in_cells(self):
-        return len(self.grid)
+        return len(self.grid[0])
 
     @property
     def height_in_cells(self):
-        return len(self.grid[0])
+        return len(self.grid)
 
     @property
     def width(self):
@@ -278,12 +277,10 @@ class Maze:
         """ Draws specified maze cell """
         mz_x, mz_y = mz_coords
 
-        if mz_x < 0 or mz_x >= self.width_in_cells or \
-            mz_y < 0 or mz_y >= self.height_in_cells:
-            return
-
-        on_screen_coords = self.get_cell_center(mz_coords)
-        self.grid[mz_y][mz_x].draw(mz_coords, on_screen_coords)
+        if 0 <= mz_x < self.width_in_cells and \
+           0 <= mz_y < self.height_in_cells:
+            on_screen_coords = self.get_cell_center(mz_coords)
+            self.grid[mz_y][mz_x].draw(mz_coords, on_screen_coords)
 
     # Loading existing mazes from files
     @staticmethod

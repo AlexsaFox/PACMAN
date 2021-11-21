@@ -2,7 +2,6 @@ import pygame
 
 from random import choice
 from math import ceil
-
 from app.states import AppState
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
@@ -124,12 +123,3 @@ class Game(AppState):
             self.camera_center[0] - sc_w/2 + self.pacman.sc_coords[0],
             self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
         )
-        # pressed = pygame.key.get_pressed()
-
-        # mult = 20 if pressed[pygame.K_LSHIFT] else 2
-
-        # x, y = self.camera_center
-        # dx = mult   * (pressed[pygame.K_d] - pressed[pygame.K_a])
-        # dy = mult/2 * (pressed[pygame.K_s] - pressed[pygame.K_w])
-
-        # self.camera_center = x + dx, y + dy
