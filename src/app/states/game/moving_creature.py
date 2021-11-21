@@ -36,6 +36,7 @@ class MovingCreature(ABC):
         self.movement_frame = 0
         self.move_direction = Direction.W
         self.goal = get_neighbor(self.cell, self.move_direction)
+        self.goal = self.goal[0] % self.game.maze.width_in_cells, self.goal[1] % self.game.maze.height_in_cells
 
     @abstractmethod
     def get_direction(self):
@@ -53,13 +54,13 @@ class MovingCreature(ABC):
     def move(self):
         if self.movement_frame == 0:
             self.cell = self.goal
-            
             if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable:
                 self.move_direction = self.get_direction()
                 if self.move_direction is not None:
                     self.direction = self.move_direction
-                
+             
             self.goal = get_neighbor(self.cell, self.move_direction)
+            self.goal = self.goal[0] % self.game.maze.width_in_cells, self.goal[1] % self.game.maze.height_in_cells
         
         d = self.goal[0] - self.cell[0], self.goal[1] - self.cell[1]
         cell_coords = self.game.maze.get_cell_center(self.cell)

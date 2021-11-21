@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Pacman(MovingCreature):
-    SECONDS_PER_CELL = 1
+    SECONDS_PER_CELL = 0.5
 
     def __init__(self, game: Game, sprite: FourDirectionAnimatedSprite,start_cell: tuple[int, int]):
         super().__init__(game=game, 
@@ -35,5 +35,10 @@ class Pacman(MovingCreature):
             return None
 
     def change_direction(self, new_direction: int):
-        if opposite(new_direction) != self.direction:
+        if self.move_direction is None or opposite(new_direction) != self.direction:
             self.hashed_direction = new_direction
+        else:
+            self.move_direction = self.direction = self.hashed_direction = new_direction
+            self.movement_frame = self.frames_per_cell - self.movement_frame
+            self.cell, self.goal = self.goal, self.cell
+
