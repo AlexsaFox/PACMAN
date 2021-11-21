@@ -7,6 +7,8 @@ from itertools import combinations
 from random import choice, randrange
 from typing import TYPE_CHECKING
 
+from pygame.constants import GL_RED_SIZE
+
 if TYPE_CHECKING:
     from app.states.game import Game
 
@@ -31,6 +33,13 @@ class MazeCell:
         self.is_ghost_box = kwargs.get('is_ghost_box', False)
         self.is_ghost_box_exit = kwargs.get('is_ghost_box_exit', False)
         self.is_pacman_spawnpoint = kwargs.get('is_pacman_spawnpoint', False)
+
+        # Set other properties to default values
+        self.turnable = False
+        self.can_go_N = False
+        self.can_go_E = False
+        self.can_go_W = False
+        self.can_go_S = False
 
         # Validate properties
         self._validate()
@@ -190,7 +199,7 @@ class Maze:
 
     def _validate(self):
         # Get pacman spawnpoint and make sure 
-        # there is one and only one of them
+        # there is at least one of them
         self._pacman_spawnpoints = []
         for i, line in enumerate(self.grid):
             for j, cell in enumerate(line):
@@ -200,6 +209,25 @@ class Maze:
         if self._pacman_spawnpoints is None:
             raise InvalidMazeLayoutError('No pacman spawnpoint found')
 
+        # Find all turnable cell
+        for i, line in enumerate(self.grid):
+            for j, cell in enumerate(line):
+                if not cell.is_wall:
+                    if i + 1 < len(self.grid) and not self.grid[i + 1][j].is_wall:
+                        cell.can_go_S = True 
+                    if 0 <= i - 1 and not self.grid[i - 1][j].is_wall:
+                        cell.can_go_N = True 
+                    if j + 1 < len(line) and not self.grid[i][j + 1].is_wall:
+                        cell.can_go_W = True 
+                    if 0 <= j - 1 <= len(line) and not self.grid[i][j - 1].is_wall:
+                        cell.can_go_E = True
+
+                    if (cell.can_go_N and cell.can_go_E) or \
+                        (cell.can_go_E and cell.can_go_S) or \
+                        (cell.can_go_S and cell.can_go_W) or \
+                        (cell.can_go_W and cell.can_go_N):
+                        cell.turnable = True
+                    
 
     # Readonly properties of maze 
     @property

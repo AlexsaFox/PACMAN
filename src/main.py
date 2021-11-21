@@ -15,6 +15,8 @@ def main():
 
         for event in pygame.event.get():
             app.handle_event(event)
+
+        app.update()
         app.draw()
 
 

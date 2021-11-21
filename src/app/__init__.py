@@ -58,4 +58,5 @@ class App:
         else:
             self.state.handle_event(event)
 
+    def update(self) -> None:
         self.state.update()

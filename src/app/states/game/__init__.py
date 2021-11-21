@@ -110,13 +110,20 @@ class Game(AppState):
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_w, pygame.K_UP]:
                 self.pacman.change_direction(Direction.N)
-            elif event.key in [pygame.K_e, pygame.K_LEFT]:
+            elif event.key in [pygame.K_a, pygame.K_LEFT]:
                 self.pacman.change_direction(Direction.E)
             elif event.key in [pygame.K_s, pygame.K_DOWN]:
                 self.pacman.change_direction(Direction.S)
             elif event.key in [pygame.K_d, pygame.K_RIGHT]:
                 self.pacman.change_direction(Direction.W)
-                
+    
+    def update(self):
+        self.pacman.move()
+        sc_w, sc_h = self.app.screen.get_size()
+        self.camera_center = (
+            self.camera_center[0] - sc_w/2 + self.pacman.sc_coords[0],
+            self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
+        )
         # pressed = pygame.key.get_pressed()
 
         # mult = 20 if pressed[pygame.K_LSHIFT] else 2

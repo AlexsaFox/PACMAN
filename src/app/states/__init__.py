@@ -10,17 +10,14 @@ if TYPE_CHECKING:
 class AppState(ABC):
     def __init__(self, app: App):
         self.app = app
-
+  
     @abstractmethod
     def draw(self) -> None:
         pass
-
-    def move(self) -> None:
-        pass
-
+    
+    @abstractmethod
     def update(self) -> None:
-        self.move()
-        self.draw()
+        pass
 
     @abstractmethod
     def handle_event(self, event) -> None:

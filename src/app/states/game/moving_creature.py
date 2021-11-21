@@ -4,11 +4,11 @@ from abc import ABC, abstractmethod
 from random import randrange
 from typing import TYPE_CHECKING
 from utilities.direction import *
+from app.states.game.maze import MazeCell
 
 if TYPE_CHECKING:
     from app.states.game import Game
     from app.themes.sprite import FourDirectionAnimatedSprite
-
 
 
 class MovingCreature(ABC):
@@ -27,14 +27,15 @@ class MovingCreature(ABC):
 
         self.sprite = sprite
         self.frame_idx = randrange(0, self.sprite.amount)
+        self.direction = Direction.W
 
         self.cell = start_cell
         self.sc_coords = self.game.maze.get_cell_center(self.cell)
 
         self.frames_per_cell = self.game.app.FPS * seconds_for_cell
         self.movement_frame = 0
-        self.direction = None
-        self.goal = get_neighbor(self.cell, self.direction)
+        self.move_direction = Direction.W
+        self.goal = get_neighbor(self.cell, self.move_direction)
 
     @abstractmethod
     def get_direction(self):
@@ -43,8 +44,7 @@ class MovingCreature(ABC):
     def draw(self):
         game_frames_per_sprite_frame = self.game.app.FPS // self.game.app.ANIMATION_FPS
 
-        frame = self.sprite.frame(self.frame_idx // game_frames_per_sprite_frame, 
-                                  self.direction if self.direction else Direction.N)
+        frame = self.sprite.frame(self.frame_idx // game_frames_per_sprite_frame, self.direction)
         self.frame_idx = (self.frame_idx + 1) % (self.sprite.amount * game_frames_per_sprite_frame)
 
         pos = frame.get_rect(midbottom=self.sc_coords)
@@ -52,9 +52,21 @@ class MovingCreature(ABC):
         
     def move(self):
         if self.movement_frame == 0:
-            ...
-            # self.direction = self.get_direction()
-
-        if self.direction is not None:
-            ...
+            self.cell = self.goal
             
+            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable:
+                self.move_direction = self.get_direction()
+                if self.move_direction is not None:
+                    self.direction = self.move_direction
+                
+            self.goal = get_neighbor(self.cell, self.move_direction)
+        
+        d = self.goal[0] - self.cell[0], self.goal[1] - self.cell[1]
+        cell_coords = self.game.maze.get_cell_center(self.cell)
+        self.sc_coords = (
+            cell_coords[0] + MazeCell.CELL_WIDTH/2 * (d[0] - d[1]) * self.movement_frame / self.frames_per_cell,
+            cell_coords[1] + MazeCell.CELL_HEIGHT/2 * (d[0] + d[1]) * self.movement_frame / self.frames_per_cell
+        )
+
+        if self.move_direction is not None:
+            self.movement_frame = (self.movement_frame + 1) % self.frames_per_cell
