@@ -212,13 +212,17 @@ class Maze:
         for i, line in enumerate(self.grid):
             for j, cell in enumerate(line):
                 if not cell.is_wall:
-                    if i + 1 < len(self.grid) and not self.grid[i + 1][j].is_wall:
+                    if i + 1 < len(self.grid) and not self.grid[i + 1][j].is_wall and \
+                        not (self.grid[i][j].is_ghost_box_exit and self.grid[i + 1][j].is_ghost_box):
                         cell.can_go_S = True 
-                    if 0 <= i - 1 and not self.grid[i - 1][j].is_wall:
+                    if 0 <= i - 1 and not self.grid[i - 1][j].is_wall and \
+                        not (self.grid[i][j].is_ghost_box_exit and self.grid[i - 1][j].is_ghost_box):
                         cell.can_go_N = True 
-                    if j + 1 < len(line) and not self.grid[i][j + 1].is_wall:
+                    if j + 1 < len(line) and not self.grid[i][j + 1].is_wall and \
+                        not (self.grid[i][j].is_ghost_box_exit and self.grid[i][j + 1].is_ghost_box):
                         cell.can_go_W = True 
-                    if 0 <= j - 1 <= len(line) and not self.grid[i][j - 1].is_wall:
+                    if 0 <= j - 1 <= len(line) and not self.grid[i][j - 1].is_wall and \
+                        not (self.grid[i][j].is_ghost_box_exit and self.grid[i][j - 1].is_ghost_box):
                         cell.can_go_E = True
 
                     if (cell.can_go_N and cell.can_go_E) or \

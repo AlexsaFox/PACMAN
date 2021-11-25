@@ -54,7 +54,9 @@ class MovingCreature(ABC):
     def move(self):
         if self.movement_frame == 0:
             self.cell = self.goal
-            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable:
+
+            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable or \
+                self.game.maze.grid[self.cell[1]][self.cell[0]].is_ghost_box_exit:
                 self.move_direction = self.get_direction()
                 if self.move_direction is not None:
                     self.direction = self.move_direction
