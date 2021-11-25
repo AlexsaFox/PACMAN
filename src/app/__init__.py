@@ -31,7 +31,7 @@ class App:
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
         self.theme = Theme.load_theme(Theme.get_available()[0])
-        self.state: AppState = Game(self)
+        self.state: AppState = Loading(self)
         self.bg_color = App.BG_COLOR
 
     @property
