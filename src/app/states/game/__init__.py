@@ -1,11 +1,16 @@
-import pygame
+from __future__ import annotations
 
+import pygame
 from math import ceil
+from typing import TYPE_CHECKING
 from app.states import AppState
 from app.states.game.ghost import Blinky, Clyde, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
 from utilities.direction import Direction
+
+if TYPE_CHECKING:
+    from app.states.game.moving_creature import MovingCreature
 
 
 class Game(AppState):
@@ -36,8 +41,12 @@ class Game(AppState):
         return self.ghosts[2]
 
     @property
-    def clyde(self) -> ...:
+    def clyde(self) -> Clyde:
         return self.ghosts[3]
+
+    @property
+    def creatures(self) -> list[MovingCreature]:
+        return [self.pacman, self.blinky, self.inky, self.pinky, self.clyde]
 
     def draw(self):
         # Get cells in corners of screen
@@ -120,10 +129,11 @@ class Game(AppState):
             # Also change boolean values that are checked if needed
             change_state()
 
-        self.pacman.draw()
+        creatures = sorted(self.creatures, 
+                           key=lambda creature: creature.sc_coords[0] + creature.sc_coords[1])
+        for creature in creatures:
+            creature.draw()
 
-        for ghost in self.ghosts:
-            ghost.draw()
 
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
