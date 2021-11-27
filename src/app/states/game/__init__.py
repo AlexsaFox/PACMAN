@@ -1,30 +1,43 @@
 import pygame
 
-from random import choice
 from math import ceil
 from app.states import AppState
+from app.states.game.ghost import Blinky, Clyde, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
 from utilities.direction import Direction
-
-
-
-
 
 
 class Game(AppState):
     def __init__(self, app):
         super().__init__(app)
 
-        self.maze = Maze.classic(self)
+        self.camera_center = 0, 0
 
-        start_mz_x, start_mz_y = self.maze.pacman_start
-        cam_abs_x = MazeCell.CELL_WIDTH/2 * (start_mz_x - start_mz_y)
-        cam_abs_y = MazeCell.CELL_HEIGHT/2 * (start_mz_x + start_mz_y)
-        self.camera_center = cam_abs_x, cam_abs_y
-        self.pacman = Pacman(game=self, 
-                             start_cell=(start_mz_x, start_mz_y),
-                             sprite=choice(self.app.theme.player))
+        self.maze = Maze.classic(self)
+        self.pacman = Pacman(game=self)
+        self.ghosts = [
+            Blinky(self),
+            Inky(self),
+            Pinky(self),
+            Clyde(self)
+        ]
+
+    @property
+    def blinky(self) -> Blinky:
+        return self.ghosts[0]
+
+    @property
+    def inky(self) -> Inky:
+        return self.ghosts[1]
+
+    @property
+    def pinky(self) -> Pinky:
+        return self.ghosts[2]
+
+    @property
+    def clyde(self) -> ...:
+        return self.ghosts[3]
 
     def draw(self):
         # Get cells in corners of screen
@@ -109,6 +122,9 @@ class Game(AppState):
 
         self.pacman.draw()
 
+        for ghost in self.ghosts:
+            ghost.draw()
+
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_w, pygame.K_UP]:
@@ -127,3 +143,6 @@ class Game(AppState):
             self.camera_center[0] - sc_w/2 + self.pacman.sc_coords[0],
             self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
         )
+
+        for ghost in self.ghosts:
+            ghost.move()

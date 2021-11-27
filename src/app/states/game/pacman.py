@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from random import choice
 from typing import TYPE_CHECKING
 from app.states.game.moving_creature import MovingCreature
 from utilities.direction import Direction, opposite
@@ -12,10 +13,10 @@ if TYPE_CHECKING:
 class Pacman(MovingCreature):
     SECONDS_PER_CELL = 0.5
 
-    def __init__(self, game: Game, sprite: FourDirectionAnimatedSprite,start_cell: tuple[int, int]):
+    def __init__(self, game: Game):
         super().__init__(game=game, 
-                         start_cell=start_cell,
-                         sprite=sprite,
+                         start_cell=game.maze.pacman_start,
+                         sprite=choice(game.app.theme.player),
                          seconds_for_cell=Pacman.SECONDS_PER_CELL)
         self.hashed_direction = None
     

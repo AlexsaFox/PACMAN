@@ -6,7 +6,7 @@ import os
 from itertools import combinations
 from random import choice, randrange
 from typing import TYPE_CHECKING
-
+from utilities.direction import Direction
 
 if TYPE_CHECKING:
     from app.states.game import Game
@@ -32,6 +32,10 @@ class MazeCell:
         self.is_ghost_box = kwargs.get('is_ghost_box', False)
         self.is_ghost_box_exit = kwargs.get('is_ghost_box_exit', False)
         self.is_pacman_spawnpoint = kwargs.get('is_pacman_spawnpoint', False)
+        self.is_blinky_scatter_goal = kwargs.get('is_blinky_scatter_goal', False)
+        self.is_pinky_scatter_goal = kwargs.get('is_pinky_scatter_goal', False)
+        self.is_inky_scatter_goal = kwargs.get('is_inky_scatter_goal', False)
+        self.is_clyde_scatter_goal = kwargs.get('is_clyde_scatter_goal', False)
 
         # Set other properties to default values
         self.turnable = False
@@ -63,6 +67,17 @@ class MazeCell:
         if self.is_ghost_box_exit:
             self.ghost_box_exit = choice(theme.ghost_box_exit)
             self.ghost_box_frame_idx = randrange(0, self.ghost_box_exit.amount)
+    
+    def can_turn(self, direction: int) -> bool:
+        if direction == Direction.N:
+            return self.can_go_N
+        if direction == Direction.E:
+            return self.can_go_E
+        if direction == Direction.W:
+            return self.can_go_W
+        if direction == Direction.S:
+            return self.can_go_S
+        raise ValueError(f'Invalid direction: {direction}')
 
     # Creating and validating cell
     @classmethod
@@ -74,7 +89,11 @@ class MazeCell:
             has_energizer = bool(n & (1 << 2)),
             is_ghost_box = bool(n & (1 << 3)),
             is_ghost_box_exit = bool(n & (1 << 4)),
-            is_pacman_spawnpoint = bool(n & (1 << 5))
+            is_pacman_spawnpoint = bool(n & (1 << 5)),
+            is_blinky_scatter_goal = bool(n & (1 << 6)),
+            is_pinky_scatter_goal = bool(n & (1 << 7)),
+            is_inky_scatter_goal = bool(n & (1 << 8)),
+            is_clyde_scatter_goal = bool(n & (1 << 9))
         )
 
     def _validate(self):
@@ -197,16 +216,77 @@ class Maze:
         self._validate()
 
     def _validate(self):
-        # Get pacman spawnpoint and make sure 
-        # there is at least one of them
+        # Get pacman and ghost spawnpoints and make sure 
+        # there is at least one of them for each character
         self._pacman_spawnpoints = []
+        self._blinky_spawnpoints = []
+        ghost_box_counter = 0
+        self._pinky_spawnpoints = []
+        self._inky_spawnpoints = []
+        self._clyde_spawnpoints = []
+        self.blinky_scatter_goal = None
+        self.pinky_scatter_goal = None
+        self.inky_scatter_goal = None
+        self.clyde_scatter_goal = None
         for i, line in enumerate(self.grid):
             for j, cell in enumerate(line):
                 if cell.is_pacman_spawnpoint:
                     self._pacman_spawnpoints.append((j, i))
 
-        if self._pacman_spawnpoints is None:
-            raise InvalidMazeLayoutError('No pacman spawnpoint found')
+                if cell.is_ghost_box_exit:
+                    self._blinky_spawnpoints.append((j, i))
+
+                if cell.is_ghost_box:
+                    if ghost_box_counter == 0:
+                        self._pinky_spawnpoints.append((j, i))
+                    if ghost_box_counter == 1:
+                        self._inky_spawnpoints.append((j, i))
+                    if ghost_box_counter == 2:
+                        self._clyde_spawnpoints.append((j, i))
+                    ghost_box_counter = (ghost_box_counter + 1) % 3
+
+                if cell.is_blinky_scatter_goal:
+                    if self.blinky_scatter_goal is None:
+                        self.blinky_scatter_goal = (j, i)
+                    else:
+                        raise InvalidMazeLayoutError(f'Multiple Blinky scatter goals found: at {self.blinky_scatter_goal} and {(j, i)}')
+
+                if cell.is_pinky_scatter_goal:
+                    if self.pinky_scatter_goal is None:
+                        self.pinky_scatter_goal = (j, i)
+                    else:
+                        raise InvalidMazeLayoutError(f'Multiple Pinky scatter goals found: at {self.pinky_scatter_goal} and {(j, i)}')
+
+                if cell.is_inky_scatter_goal:
+                    if self.inky_scatter_goal is None:
+                        self.inky_scatter_goal = (j, i)
+                    else:
+                        raise InvalidMazeLayoutError(f'Multiple Inky scatter goals found: at {self.inky_scatter_goal} and {(j, i)}')
+
+                if cell.is_clyde_scatter_goal:
+                    if self.clyde_scatter_goal is None:
+                        self.clyde_scatter_goal = (j, i)
+                    else:
+                        raise InvalidMazeLayoutError(f'Multiple Clyde scatter goals found: at {self.clyde_scatter_goal} and {(j, i)}')
+        
+        if not self._pacman_spawnpoints:
+            raise InvalidMazeLayoutError('No Pacman spawnpoint found')
+        if not self._blinky_spawnpoints:
+            raise InvalidMazeLayoutError('No Blinky spawnpoint found')
+        if not self._pinky_spawnpoints:
+            raise InvalidMazeLayoutError('No Pinky spawnpoint found')
+        if not self._inky_spawnpoints:
+            raise InvalidMazeLayoutError('No Inky spawnpoint found')
+        if not self._clyde_spawnpoints:
+            raise InvalidMazeLayoutError('No Clyde spawnpoint found')
+        if self.blinky_scatter_goal is None:
+            raise InvalidMazeLayoutError('No Blinky scatter goal found')
+        if self.pinky_scatter_goal is None:
+            raise InvalidMazeLayoutError('No Pinky scatter goal found')
+        if self.inky_scatter_goal is None:
+            raise InvalidMazeLayoutError('No Inky scatter goal found')
+        if self.clyde_scatter_goal is None:
+            raise InvalidMazeLayoutError('No Clyde scatter goal found')
 
         # Find all turnable cells
         for i, line in enumerate(self.grid):
@@ -225,7 +305,8 @@ class Maze:
                         not (self.grid[i][j].is_ghost_box_exit and self.grid[i][j - 1].is_ghost_box):
                         cell.can_go_E = True
 
-                    if (cell.can_go_N and cell.can_go_E) or \
+                    if cell.is_ghost_box_exit or \
+                        (cell.can_go_N and cell.can_go_E) or \
                         (cell.can_go_E and cell.can_go_S) or \
                         (cell.can_go_S and cell.can_go_W) or \
                         (cell.can_go_W and cell.can_go_N):
@@ -262,10 +343,23 @@ class Maze:
 
     @property
     def pacman_start(self):
-        """ Maze coordinates of random pacman spawnpoint 
-        in format of (x, y)
-        """        
         return choice(self._pacman_spawnpoints)
+
+    @property
+    def blinky_start(self):
+        return choice(self._blinky_spawnpoints)
+
+    @property
+    def pinky_start(self):
+        return choice(self._pinky_spawnpoints)
+        
+    @property
+    def inky_start(self):
+        return choice(self._inky_spawnpoints)
+        
+    @property
+    def clyde_start(self):
+        return choice(self._clyde_spawnpoints)
 
     # Drawing cells to screen
     def get_cell_center(self, mz_coords: tuple[int, int]) -> tuple[int, int]:

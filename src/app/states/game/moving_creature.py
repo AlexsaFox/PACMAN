@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from random import randrange
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 from utilities.direction import *
 from app.states.game.maze import MazeCell
 
@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 class MovingCreature(ABC):
     def __init__(self, game: Game, sprite: FourDirectionAnimatedSprite, 
-                 start_cell: tuple[int, int], seconds_for_cell: int):
+                 start_cell: tuple[int, int], seconds_for_cell: float):
         """ Creates movable object
 
         Args:
             game (Game): Game object that created this creature
             start_cell (tuple[int, int]): Starting point of creature in maze
-            seconds_for_cell (int): Speed of creature; Determines how many seconds
+            seconds_for_cell (float): Speed of creature; Determines how many seconds
             passes while creature is moving from cell to it's neighbor
         """  
 
@@ -39,7 +39,7 @@ class MovingCreature(ABC):
         self.goal = self.goal[0] % self.game.maze.width_in_cells, self.goal[1] % self.game.maze.height_in_cells
 
     @abstractmethod
-    def get_direction(self):
+    def get_direction(self) -> Union[int, None]:
         pass
 
     def draw(self):
@@ -55,8 +55,7 @@ class MovingCreature(ABC):
         if self.movement_frame == 0:
             self.cell = self.goal
 
-            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable or \
-                self.game.maze.grid[self.cell[1]][self.cell[0]].is_ghost_box_exit:
+            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable:
                 self.move_direction = self.get_direction()
                 if self.move_direction is not None:
                     self.direction = self.move_direction
