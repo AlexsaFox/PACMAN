@@ -34,7 +34,7 @@ class MovingCreature(ABC):
 
         self.frames_per_cell = self.game.app.FPS * seconds_for_cell
         self.movement_frame = 0
-        self.move_direction = Direction.W
+        self.move_direction = None
         self.goal = get_neighbor(self.cell, self.move_direction)
         self.goal = self.goal[0] % self.game.maze.width_in_cells, self.goal[1] % self.game.maze.height_in_cells
 
@@ -53,17 +53,24 @@ class MovingCreature(ABC):
         
     def move(self):
         if self.movement_frame == 0:
-            self.cell = self.goal
+            self.cell = (
+                self.goal[0] % self.game.maze.width_in_cells,
+                self.goal[1] % self.game.maze.height_in_cells
+            )
 
-            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable:
+            if self.game.maze.grid[self.cell[1]][self.cell[0]].turnable or self.move_direction is None:
                 self.move_direction = self.get_direction()
                 if self.move_direction is not None:
                     self.direction = self.move_direction
-             
+
             self.goal = get_neighbor(self.cell, self.move_direction)
-            self.goal = self.goal[0] % self.game.maze.width_in_cells, self.goal[1] % self.game.maze.height_in_cells
+            self.goal = self.goal[0], self.goal[1]
+
+        d = (
+            self.goal[0] - self.cell[0],
+            self.goal[1] - self.cell[1]
+        )
         
-        d = self.goal[0] - self.cell[0], self.goal[1] - self.cell[1]
         cell_coords = self.game.maze.get_cell_center(self.cell)
         self.sc_coords = (
             cell_coords[0] + MazeCell.CELL_WIDTH/2 * (d[0] - d[1]) * self.movement_frame / self.frames_per_cell,

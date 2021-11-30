@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import csv
 import os
-
 from itertools import combinations
 from random import choice, randrange
 from typing import TYPE_CHECKING
@@ -139,29 +138,23 @@ class MazeCell:
         # Display wall according to surroundings
         if self.is_wall:
             # Check each corner if it needs wall
-            nw = mz_x == 0 or \
-                 mz_y == 0 or \
-                 (self.maze.grid[mz_y - 1][mz_x].is_wall and \
-                  self.maze.grid[mz_y][mz_x - 1].is_wall and \
-                  self.maze.grid[mz_y - 1][mz_x - 1].is_wall)
+            w, h = self.maze.width_in_cells, self.maze.height_in_cells
 
-            sw = mz_x == 0 or \
-                 mz_y == self.maze.height_in_cells - 1 or \
-                 (self.maze.grid[mz_y + 1][mz_x].is_wall and \
-                  self.maze.grid[mz_y][mz_x - 1].is_wall and \
-                  self.maze.grid[mz_y + 1][mz_x - 1].is_wall)
+            nw = (mz_y <= 0 or self.maze.grid[mz_y - 1][mz_x].is_wall) and \
+                 (mz_x <= 0 or self.maze.grid[mz_y][mz_x - 1].is_wall) and \
+                 (mz_x <= 0 or mz_y <= 0 or self.maze.grid[mz_y - 1][mz_x - 1].is_wall)
 
-            se = mz_x == self.maze.width_in_cells - 1 or \
-                 mz_y == self.maze.height_in_cells - 1 or \
-                 (self.maze.grid[mz_y + 1][mz_x].is_wall and \
-                  self.maze.grid[mz_y][mz_x + 1].is_wall and \
-                  self.maze.grid[mz_y + 1][mz_x + 1].is_wall)
+            sw = (mz_y >= h - 1 or self.maze.grid[mz_y + 1][mz_x].is_wall) and \
+                 (mz_x <= 0 or self.maze.grid[mz_y][mz_x - 1].is_wall) and \
+                 (mz_x <= 0 or mz_y >= h - 1 or self.maze.grid[mz_y + 1][mz_x - 1].is_wall)
 
-            ne = mz_x == self.maze.width_in_cells - 1 or \
-                 mz_y == 0 or \
-                 (self.maze.grid[mz_y - 1][mz_x].is_wall and \
-                  self.maze.grid[mz_y][mz_x + 1].is_wall and \
-                  self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
+            se = (mz_y >= h - 1 or self.maze.grid[mz_y + 1][mz_x].is_wall) and \
+                 (mz_x >= w - 1 or self.maze.grid[mz_y][mz_x + 1].is_wall) and \
+                 (mz_x >= w - 1 or mz_y >= h - 1 or self.maze.grid[mz_y + 1][mz_x + 1].is_wall)
+
+            ne = (mz_y <= 0 or self.maze.grid[mz_y - 1][mz_x].is_wall) and \
+                 (mz_x >= w - 1 or self.maze.grid[mz_y][mz_x + 1].is_wall) and \
+                 (mz_x >= w - 1 or mz_y <= 0 or self.maze.grid[mz_y - 1][mz_x + 1].is_wall)
 
             # Draw walls in order
             wall_frame = self.wall_sprite.frame(self.wall_sprite_idx // game_frames_per_sprite_frame)

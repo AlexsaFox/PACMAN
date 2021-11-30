@@ -79,7 +79,7 @@ class GhostBase(MovingCreature):
 
         direction = None
         bt_cell = goal
-        print(goal)
+
         while bt_cell != path[bt_cell[1]][bt_cell[0]]:
             d = (
                 bt_cell[0] - path[bt_cell[1]][bt_cell[0]][0],
@@ -122,7 +122,7 @@ class Blinky(GhostBase):
 
 class Inky(GhostBase):
     SECONDS_FOR_CELL = 0.5
-    SECONDS_FOR_CHASE_MODE = 10
+    SECONDS_FOR_CHASE_MODE = 15
     SECONDS_FOR_SCATTER_MODE = 5
 
     def __init__(self, game: Game):
@@ -161,7 +161,7 @@ class Inky(GhostBase):
 
 class Pinky(GhostBase):
     SECONDS_FOR_CELL = 0.5
-    SECONDS_FOR_CHASE_MODE = 10
+    SECONDS_FOR_CHASE_MODE = 20
     SECONDS_FOR_SCATTER_MODE = 5
 
     def __init__(self, game: Game):
@@ -179,6 +179,10 @@ class Pinky(GhostBase):
         direction - movement direction
         """
         neighbor = get_neighbor(cell, direction)
+        neighbor = (
+            neighbor[0] % self.game.maze.width_in_cells,
+            neighbor[1] % self.game.maze.height_in_cells
+        )
         if not self.game.maze.grid[neighbor[1]][neighbor[0]].is_wall:
             return neighbor, direction
         elif self.game.maze.grid[cell[1]][cell[0]].can_turn(left(direction)) and \
@@ -199,7 +203,7 @@ class Pinky(GhostBase):
             return self.scatter_goal
         elif self.mode == GhostMode.CHASE:
             cell, direction = self.game.pacman.cell, self.game.pacman.direction
-            for _ in range(3):
+            for _ in range(6):
                 cell, direction = self.go_forward(cell, direction)
             return cell
 
@@ -207,7 +211,7 @@ class Pinky(GhostBase):
 class Clyde(GhostBase):
     SECONDS_FOR_CELL = 0.5
     SECONDS_FOR_CHASE_MODE = 15
-    SECONDS_FOR_SCATTER_MODE = 5
+    SECONDS_FOR_SCATTER_MODE = 3
 
     def __init__(self, game: Game):
         super().__init__(game=game,

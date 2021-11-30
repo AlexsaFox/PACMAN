@@ -7,7 +7,6 @@ from utilities.direction import Direction, opposite
 
 if TYPE_CHECKING:
     from app.states.game import Game
-    from app.themes.sprite import FourDirectionAnimatedSprite
 
 
 class Pacman(MovingCreature):
