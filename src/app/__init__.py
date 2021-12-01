@@ -30,7 +30,7 @@ class App:
         self.screen = pygame.display.set_mode(App.DEFAULT_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
-        self.theme = Theme.load_theme(Theme.get_available()[0])
+        self.theme = Theme.load_theme(Theme.get_available()[1])
         self.state: AppState = Game(self)
         self.bg_color = App.BG_COLOR
 

@@ -17,6 +17,8 @@ class Game(AppState):
     def __init__(self, app):
         super().__init__(app)
 
+        self.score = 0
+        self.lives = 3
         self.camera_center = 0, 0
 
         self.maze = Maze.classic(self)
@@ -129,10 +131,14 @@ class Game(AppState):
             # Also change boolean values that are checked if needed
             change_state()
 
+        # Draw creatures in order
         creatures = sorted(self.creatures, 
-                           key=lambda creature: creature.sc_coords[0] + creature.sc_coords[1])
+                           key=lambda creature: creature.sc_coords[1])
         for creature in creatures:
             creature.draw()
+
+        # Display score and lives
+        
 
 
     def handle_event(self, event: pygame.event.Event):

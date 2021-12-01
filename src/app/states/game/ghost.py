@@ -178,6 +178,7 @@ class Pinky(GhostBase):
         coords - coordinates of new cell
         direction - movement direction
         """
+        
         neighbor = get_neighbor(cell, direction)
         neighbor = (
             neighbor[0] % self.game.maze.width_in_cells,

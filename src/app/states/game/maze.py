@@ -35,6 +35,7 @@ class MazeCell:
         self.is_pinky_scatter_goal = kwargs.get('is_pinky_scatter_goal', False)
         self.is_inky_scatter_goal = kwargs.get('is_inky_scatter_goal', False)
         self.is_clyde_scatter_goal = kwargs.get('is_clyde_scatter_goal', False)
+        self.has_fruit = kwargs.get('has_fruit', False)
 
         # Set other properties to default values
         self.turnable = False
@@ -66,6 +67,10 @@ class MazeCell:
         if self.is_ghost_box_exit:
             self.ghost_box_exit = choice(theme.ghost_box_exit)
             self.ghost_box_frame_idx = randrange(0, self.ghost_box_exit.amount)
+
+        if self.has_fruit:
+            self.fruit_sprite = choice(theme.fruit)
+            self.fruit_frame_idx = randrange(self.fruit_sprite.amount)
     
     def can_turn(self, direction: int) -> bool:
         if direction == Direction.N:
@@ -92,7 +97,8 @@ class MazeCell:
             is_blinky_scatter_goal = bool(n & (1 << 6)),
             is_pinky_scatter_goal = bool(n & (1 << 7)),
             is_inky_scatter_goal = bool(n & (1 << 8)),
-            is_clyde_scatter_goal = bool(n & (1 << 9))
+            is_clyde_scatter_goal = bool(n & (1 << 9)),
+            has_fruit = bool(n & (1 << 10))
         )
 
     def _validate(self):
@@ -188,6 +194,12 @@ class MazeCell:
             self.energizer_frame_idx = (self.energizer_frame_idx + 1) % (self.energizer_sprite.amount * game_frames_per_sprite_frame)
             pos = energizer_frame.get_rect(center=screen_coords)
             screen.blit(energizer_frame, pos)
+
+        if self.has_fruit:
+            fruit_frame = self.fruit_sprite.frame(self.fruit_frame_idx // game_frames_per_sprite_frame)
+            self.fruit_frame_idx = (self.fruit_frame_idx + 1) % (self.fruit_sprite.amount * game_frames_per_sprite_frame)
+            pos = fruit_frame.get_rect(center=screen_coords)
+            screen.blit(fruit_frame, pos)
 
 
 class Maze:

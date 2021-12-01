@@ -42,3 +42,13 @@ class Pacman(MovingCreature):
             self.movement_frame = self.frames_per_cell - self.movement_frame
             self.cell, self.goal = self.goal, self.cell
 
+    def move(self):
+        super().move()
+
+        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_dot:
+            self.game.maze.grid[self.cell[1]][self.cell[0]].has_dot = False
+            self.game.score += 10
+
+        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit:
+            self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit = False
+            self.game.score += choice((100, 200, 300))
