@@ -18,10 +18,12 @@ if TYPE_CHECKING:
 class GhostMode:
     CHASE = 0
     SCATTER = 1
-    SCATTER = 2
+    SCARE = 2
 
 
 class GhostBase(MovingCreature):
+    SECONDS_FOR_SCARE_MODE = 20
+
     def __init__(self, game: Game, sprite: FourDirectionAnimatedSprite, 
                  start_cell: tuple[int, int], seconds_for_cell: float, 
                  seconds_for_chase_mode: float, seconds_for_scatter_mode: float,
@@ -37,8 +39,22 @@ class GhostBase(MovingCreature):
         self.mode = GhostMode.CHASE
 
     @abstractmethod
-    def get_goal_cell(self) -> tuple[int, int]:
+    def get_chase_goal(self) -> tuple[int, int]:
         pass
+
+    def get_goal_cell(self) -> tuple[int, int]:
+        if self.mode == GhostMode.SCATTER:
+            return self.game.maze.blinky_scatter_goal
+        elif self.mode == GhostMode.SCARE:
+            neighbors = []
+            for d in (Direction.N, Direction.E, Direction.W, Direction.S):
+                neighbor = get_neighbor(self.cell, d)
+                if not self.game.maze[neighbor[1]][neighbor[0]].is_wall:
+                    neighbors.append(neighbor)
+
+            return choice(neighbors)
+        elif self.mode == GhostMode.CHASE:
+            return self.get_chase_goal()
     
     def check_switch_mode(self):
         current_time = pygame.time.get_ticks()
@@ -113,11 +129,8 @@ class Blinky(GhostBase):
                          seconds_for_chase_mode=Blinky.SECONDS_FOR_CHASE_MODE,
                          seconds_for_scatter_mode=Blinky.SECONDS_FOR_SCATTER_MODE)
 
-    def get_goal_cell(self) -> tuple[int, int]:
-        if self.mode == GhostMode.SCATTER:
-            return self.game.maze.blinky_scatter_goal
-        elif self.mode == GhostMode.CHASE:
-            return self.game.pacman.cell
+    def get_chase_goal(self) -> tuple[int, int]:
+        return self.game.pacman.cell
 
 
 class Inky(GhostBase):
@@ -134,29 +147,26 @@ class Inky(GhostBase):
                          seconds_for_chase_mode=Inky.SECONDS_FOR_CHASE_MODE,
                          seconds_for_scatter_mode=Inky.SECONDS_FOR_SCATTER_MODE)
 
-    def get_goal_cell(self) -> tuple[int, int]:
-        if self.mode == GhostMode.SCATTER:
-            return self.scatter_goal
-        elif self.mode == GhostMode.CHASE:
-            blinky_pos = self.game.blinky.cell
-            pacman_pos = self.game.pacman.cell
-            d = pacman_pos[0] - blinky_pos[0], pacman_pos[1] - blinky_pos[1]
-            goal = pacman_pos[0] + d[0], pacman_pos[1] + d[1]
+    def get_chase_goal(self) -> tuple[int, int]:
+        blinky_pos = self.game.blinky.cell
+        pacman_pos = self.game.pacman.cell
+        d = pacman_pos[0] - blinky_pos[0], pacman_pos[1] - blinky_pos[1]
+        goal = pacman_pos[0] + d[0], pacman_pos[1] + d[1]
 
-            mz_w, mz_h = self.game.maze.width_in_cells, self.game.maze.height_in_cells
-            if 0 <= goal[1] < mz_h and 0 <= goal[0] < mz_w and \
-                not self.game.maze.grid[goal[1]][goal[0]].is_wall:
-                return goal
-            
-            min_dist = inf
-            min_dist_cell = None
-            for i, line in enumerate(self.game.maze.grid):
-                for j, cell in enumerate(line):
-                    if not cell.is_wall and (abs(goal[0] - i) + abs(goal[1] - j)) < min_dist:
-                        min_dist = abs(goal[0] - i) + abs(goal[1] - j)
-                        min_dist_cell = (j, i)
+        mz_w, mz_h = self.game.maze.width_in_cells, self.game.maze.height_in_cells
+        if 0 <= goal[1] < mz_h and 0 <= goal[0] < mz_w and \
+            not self.game.maze.grid[goal[1]][goal[0]].is_wall:
+            return goal
+        
+        min_dist = inf
+        min_dist_cell = None
+        for i, line in enumerate(self.game.maze.grid):
+            for j, cell in enumerate(line):
+                if not cell.is_wall and (abs(goal[0] - i) + abs(goal[1] - j)) < min_dist:
+                    min_dist = abs(goal[0] - i) + abs(goal[1] - j)
+                    min_dist_cell = (j, i)
 
-            return min_dist_cell
+        return min_dist_cell
 
 
 class Pinky(GhostBase):
@@ -199,14 +209,11 @@ class Pinky(GhostBase):
         
 
 
-    def get_goal_cell(self) -> tuple[int, int]:
-        if self.mode == GhostMode.SCATTER:
-            return self.scatter_goal
-        elif self.mode == GhostMode.CHASE:
-            cell, direction = self.game.pacman.cell, self.game.pacman.direction
-            for _ in range(6):
-                cell, direction = self.go_forward(cell, direction)
-            return cell
+    def get_chase_goal(self) -> tuple[int, int]:
+        cell, direction = self.game.pacman.cell, self.game.pacman.direction
+        for _ in range(6):
+            cell, direction = self.go_forward(cell, direction)
+        return cell
 
 
 class Clyde(GhostBase):
@@ -223,14 +230,8 @@ class Clyde(GhostBase):
                          seconds_for_chase_mode=Clyde.SECONDS_FOR_CHASE_MODE,
                          seconds_for_scatter_mode=Clyde.SECONDS_FOR_SCATTER_MODE)
 
-    def get_goal_cell(self) -> tuple[int, int]:
-        if self.mode == GhostMode.SCATTER:
-            return self.scatter_goal
-        else:
-            pacman_pos = self.game.pacman.cell
-            dist_to_pacman = abs(self.cell[0] - pacman_pos[0]) + abs(self.cell[1] - pacman_pos[1])
+    def get_chase_goal(self) -> tuple[int, int]:
+        pacman_pos = self.game.pacman.cell
+        dist_to_pacman = abs(self.cell[0] - pacman_pos[0]) + abs(self.cell[1] - pacman_pos[1])
 
-            if dist_to_pacman > 8:
-                return pacman_pos
-            else:
-                return self.scatter_goal 
+        return pacman_pos if dist_to_pacman > 8 else self.scatter_goal 
