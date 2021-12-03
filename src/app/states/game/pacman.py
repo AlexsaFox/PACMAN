@@ -52,3 +52,8 @@ class Pacman(MovingCreature):
         if self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit:
             self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit = False
             self.game.score += choice((100, 200, 300))
+
+        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_energizer:
+            self.game.maze.grid[self.cell[1]][self.cell[0]].has_energizer = False
+            self.game.score += 50
+            self.game.activate_scare()

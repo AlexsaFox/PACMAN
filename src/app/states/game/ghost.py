@@ -4,9 +4,8 @@ import pygame
 from abc import abstractmethod
 from math import inf
 from queue import Queue
-from random import choice
+from random import choice, randrange
 from typing import TYPE_CHECKING
-from app.states.game import pacman
 from utilities.direction import *
 from app.states.game.moving_creature import MovingCreature
 
@@ -32,6 +31,7 @@ class GhostBase(MovingCreature):
                          start_cell=start_cell,
                          sprite=sprite,
                          seconds_for_cell=seconds_for_cell)
+        self.regular_sprite = sprite
         self.scatter_goal = scatter_goal
         self.seconds_for_chase_mode = seconds_for_chase_mode
         self.seconds_for_scatter_mode = seconds_for_scatter_mode
@@ -49,9 +49,8 @@ class GhostBase(MovingCreature):
             neighbors = []
             for d in (Direction.N, Direction.E, Direction.W, Direction.S):
                 neighbor = get_neighbor(self.cell, d)
-                if not self.game.maze[neighbor[1]][neighbor[0]].is_wall:
+                if not self.game.maze.grid[neighbor[1]][neighbor[0]].is_wall:
                     neighbors.append(neighbor)
-
             return choice(neighbors)
         elif self.mode == GhostMode.CHASE:
             return self.get_chase_goal()
@@ -66,6 +65,22 @@ class GhostBase(MovingCreature):
             self.cell == self.scatter_goal:
             self.mode = GhostMode.CHASE
             self.change_time = current_time
+    
+    @property
+    def scare_mode(self):
+        raise NotImplementedError('This does not need to be accessed')
+
+    @scare_mode.setter
+    def scare_mode(self, activate: bool):
+        if activate:
+            self.mode = GhostMode.SCARE
+            self.sprite = choice(self.game.app.theme.enemy_scare)
+            self.frame_idx = randrange(0, self.sprite.amount)
+            print(self.sprite.amount, self.frame_idx)
+        else:
+            self.mode = choice((GhostMode.CHASE, GhostMode.SCATTER))
+            self.sprite = self.regular_sprite
+            self.frmae_idx = randrange(0, self.sprite.amount)
 
     def get_direction(self):
         self.check_switch_mode()

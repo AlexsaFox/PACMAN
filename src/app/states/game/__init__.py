@@ -4,7 +4,7 @@ import pygame
 from math import ceil
 from typing import TYPE_CHECKING
 from app.states import AppState
-from app.states.game.ghost import Blinky, Clyde, Inky, Pinky
+from app.states.game.ghost import Blinky, Clyde, GhostBase, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
 from utilities.direction import Direction
@@ -29,6 +29,7 @@ class Game(AppState):
             Pinky(self),
             Clyde(self)
         ]
+        self.scare_timer = 0
 
     @property
     def blinky(self) -> Blinky:
@@ -139,8 +140,6 @@ class Game(AppState):
 
         # Display score and lives
         
-
-
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_w, pygame.K_UP]:
@@ -160,5 +159,17 @@ class Game(AppState):
             self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
         )
 
+        if self.scare_timer == 1:
+            self.scare_timer = 0
+            for ghost in self.ghosts:
+                ghost.scare_mode = False
+        elif self.scare_timer > 0:
+            self.scare_timer -= 1
+
         for ghost in self.ghosts:
             ghost.move()
+
+    def activate_scare(self):
+        for ghost in self.ghosts:
+            ghost.scare_mode = True
+            self.scare_timer = self.app.FPS * GhostBase.SECONDS_FOR_SCARE_MODE
