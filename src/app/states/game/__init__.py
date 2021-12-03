@@ -1,25 +1,54 @@
+from __future__ import annotations
+
 import pygame
-
 from math import ceil
-
+from typing import TYPE_CHECKING
 from app.states import AppState
+from app.states.game.ghost import Blinky, Clyde, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
+from app.states.game.pacman import Pacman
 from utilities.direction import Direction
 
-
-
-
+if TYPE_CHECKING:
+    from app.states.game.moving_creature import MovingCreature
 
 
 class Game(AppState):
     def __init__(self, app):
         super().__init__(app)
+
+        self.score = 0
+        self.lives = 3
+        self.camera_center = 0, 0
+
         self.maze = Maze.classic(self)
-        
-        # Camera center. Cemter of cell in
-        # northeast corner of maze is taken as (0, 0)
-        self.camera_center = 0, self.maze.height/2 - MazeCell.CELL_HEIGHT/2     # Placeholder, center of maze
-                                                                                # Should be pacman start location
+        self.pacman = Pacman(game=self)
+        self.ghosts = [
+            Blinky(self),
+            Inky(self),
+            Pinky(self),
+            Clyde(self)
+        ]
+
+    @property
+    def blinky(self) -> Blinky:
+        return self.ghosts[0]
+
+    @property
+    def inky(self) -> Inky:
+        return self.ghosts[1]
+
+    @property
+    def pinky(self) -> Pinky:
+        return self.ghosts[2]
+
+    @property
+    def clyde(self) -> Clyde:
+        return self.ghosts[3]
+
+    @property
+    def creatures(self) -> list[MovingCreature]:
+        return [self.pacman, self.blinky, self.inky, self.pinky, self.clyde]
 
     def draw(self):
         # Get cells in corners of screen
@@ -102,13 +131,34 @@ class Game(AppState):
             # Also change boolean values that are checked if needed
             change_state()
 
-    def handle_event(self, event):
-        pressed = pygame.key.get_pressed()
+        # Draw creatures in order
+        creatures = sorted(self.creatures, 
+                           key=lambda creature: creature.sc_coords[1])
+        for creature in creatures:
+            creature.draw()
 
-        mult = 20 if pressed[pygame.K_LSHIFT] else 2
+        # Display score and lives
+        
 
-        x, y = self.camera_center
-        dx = mult   * (pressed[pygame.K_d] - pressed[pygame.K_a])
-        dy = mult/2 * (pressed[pygame.K_s] - pressed[pygame.K_w])
 
-        self.camera_center = x + dx, y + dy
+    def handle_event(self, event: pygame.event.Event):
+        if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_w, pygame.K_UP]:
+                self.pacman.change_direction(Direction.N)
+            elif event.key in [pygame.K_a, pygame.K_LEFT]:
+                self.pacman.change_direction(Direction.E)
+            elif event.key in [pygame.K_s, pygame.K_DOWN]:
+                self.pacman.change_direction(Direction.S)
+            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
+                self.pacman.change_direction(Direction.W)
+    
+    def update(self):
+        self.pacman.move()
+        sc_w, sc_h = self.app.screen.get_size()
+        self.camera_center = (
+            self.camera_center[0] - sc_w/2 + self.pacman.sc_coords[0],
+            self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
+        )
+
+        for ghost in self.ghosts:
+            ghost.move()

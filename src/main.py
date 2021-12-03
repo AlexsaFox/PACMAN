@@ -10,11 +10,10 @@ def main():
     while app.running:
         clock.tick(app.FPS)
 
-        # TODO: Clear this
-        print('FPS:', clock.get_fps())
-
         for event in pygame.event.get():
             app.handle_event(event)
+
+        app.update()
         app.draw()
 
 

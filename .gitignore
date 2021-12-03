@@ -10,3 +10,6 @@ venv/
 # Pyinstaller
 main.spec
 build/
+
+# Temporary files for testing purposes
+levels/test.csv

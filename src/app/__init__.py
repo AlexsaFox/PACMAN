@@ -17,6 +17,7 @@ def resource_path(relative):
 class App:
     # Constants
     WINDOW_CAPTION = "Pac-man"
+    ANIMATION_FPS = 15
     FPS = 60
     DEFAULT_SIZE = 1920, 900
 
@@ -29,8 +30,8 @@ class App:
         self.screen = pygame.display.set_mode(App.DEFAULT_SIZE, pygame.RESIZABLE)
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
-        self.theme = Theme.load_theme(Theme.get_available()[0])
-        self.state: AppState = Loading(self)
+        self.theme = Theme.load_theme(Theme.get_available()[1])
+        self.state: AppState = Game(self)
         self.bg_color = App.BG_COLOR
 
     @property
@@ -57,4 +58,5 @@ class App:
         else:
             self.state.handle_event(event)
 
+    def update(self) -> None:
         self.state.update()

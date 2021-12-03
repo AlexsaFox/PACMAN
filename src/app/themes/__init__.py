@@ -1,7 +1,7 @@
 import os
 
 from app.themes.sprite import *
-
+import app
 
 class Theme:
     PATH = "themes"
