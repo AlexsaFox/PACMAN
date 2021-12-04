@@ -18,6 +18,9 @@ class Pacman(MovingCreature):
                          sprite=choice(game.app.theme.player),
                          seconds_for_cell=Pacman.SECONDS_PER_CELL)
         self.hashed_direction = None
+
+    def respawn(self):
+        self.game.pacman = Pacman(self.game)
     
     def get_direction(self):
         cell = self.game.maze.grid[self.cell[1]][self.cell[0]]

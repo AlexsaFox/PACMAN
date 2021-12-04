@@ -33,11 +33,11 @@ class Game(AppState):
     LIFE_SPRITE_WIDTH = 60
     LIFE_SPRITE_PADDING = 20
 
-    def __init__(self, app):
+    def __init__(self, app, score: int = 0, lives: int = 3):
         super().__init__(app)
 
-        self.score = 0
-        self.lives = 3
+        self.score = score
+        self.lives = lives
         self.is_paused = False
         self.camera_center = 0, 0
 
@@ -45,7 +45,7 @@ class Game(AppState):
         self.life_frame_idx = randrange(0, self.life_sprite.amount)
         
         self.maze = Maze.classic(self)
-        self.pacman = Pacman(game=self)
+        self.pacman = Pacman(self)
         self.ghosts = [
             Blinky(self),
             Inky(self),
@@ -269,7 +269,12 @@ class Game(AppState):
 
                 # In regular mode
                 else:
-                    exit(0)
+                    self.lives -= 1
+                    if self.lives > 0:
+                        self.pacman.respawn()
+                        break
+                    else:
+                        self.game_over()
 
     def activate_scare(self):
         for ghost in self.ghosts:
@@ -277,3 +282,7 @@ class Game(AppState):
 
         self.scare_score_for_ghost = Game.BASE_SCORE_FOR_GHOST_IN_SCARE_MODE
         self.scare_timer = self.app.FPS * GhostBase.SECONDS_FOR_SCARE_MODE
+
+    def game_over(self):
+        """ Is called when pacman loses all lives """
+        exit(0)
