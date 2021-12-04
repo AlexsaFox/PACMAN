@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import os
+import app
 from itertools import combinations
 from random import choice, randrange
 from typing import TYPE_CHECKING
@@ -399,7 +400,7 @@ class Maze:
     # Loading existing mazes from files
     @staticmethod
     def _load_level_csv(level_name) -> list[list[int]]:
-        path = os.path.join(Maze.LEVEL_PATH, level_name)
+        path = app.resource_path(os.path.join(Maze.LEVEL_PATH, level_name))
         if not os.path.exists(path):
             raise FileNotFoundError(f"Level file at {path} doesn't exist")
 
