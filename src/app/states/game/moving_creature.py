@@ -13,7 +13,8 @@ if TYPE_CHECKING:
 
 
 class Line:
-    EPS = 1e-3
+    """ Represents line on surface """    
+    EPS = 1e-6
 
     def __init__(self, p1: tuple[float, float], p2: tuple[float, float]):
         x1, y1 = p1
@@ -31,7 +32,7 @@ class Line:
 
     def get_intersection_point(self, other: Line):
         if self.is_parallel_to(other):
-            raise ValueError(f"{self} and {other} got no intersection points: they are parallel.")
+            return None
 
         x = (other.b - self.b) / (self.k - other.k)
         y = self.get_ordinate(x)
@@ -118,12 +119,14 @@ class MovingCreature(ABC):
         self_line = Line(self_1, self_2)
         other_line =  Line(other_1, other_2)
 
+        # If lines are parallel, check if they have common segment
         if self_line.is_parallel_to(other_line):
             return self_line == other_line and (
                 self_min_x <= other_min_x <= self_max_x or \
                 self_min_x <= other_max_x <= self_max_x
             )
-            
+        
+        # Otherwise, check if intersection point belongs to both of lines
         intersection = self_line.get_intersection_point(other_line)
         return self_min_x <= intersection[0] <= self_max_x and \
                other_min_x <= intersection[0] <= other_max_x
