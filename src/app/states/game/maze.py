@@ -83,6 +83,10 @@ class MazeCell:
             return self.can_go_S
         raise ValueError(f'Invalid direction: {direction}')
 
+    @property
+    def has_collectible(self):
+        return self.has_dot or self.has_energizer or self.has_fruit
+
     # Creating and validating cell
     @classmethod
     def from_number(self, maze: Maze, n: int) -> MazeCell:
@@ -217,6 +221,7 @@ class Maze:
         self.game = game
         self.grid = [[MazeCell.from_number(self, n) for n in line] 
                     for line in grid_nums]
+        self.collectibles_amount = 0
 
         self._validate()
 
@@ -316,6 +321,12 @@ class Maze:
                         (cell.can_go_S and cell.can_go_W) or \
                         (cell.can_go_W and cell.can_go_N):
                         cell.turnable = True
+
+        # Count collectibles
+        for line in self.grid:
+            for cell in line:
+                if cell.has_collectible:
+                    self.collectibles_amount += 1
                     
 
     # Readonly properties of maze 

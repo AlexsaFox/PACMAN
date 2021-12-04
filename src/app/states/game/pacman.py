@@ -48,15 +48,21 @@ class Pacman(MovingCreature):
     def move(self):
         super().move()
 
-        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_dot:
-            self.game.maze.grid[self.cell[1]][self.cell[0]].has_dot = False
-            self.game.score += 10
+        current_cell = self.game.maze.grid[self.cell[1]][self.cell[0]]
+        if current_cell.has_collectible:
+            if current_cell.has_dot:
+                current_cell.has_dot = False
+                self.game.score += 10
 
-        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit:
-            self.game.maze.grid[self.cell[1]][self.cell[0]].has_fruit = False
-            self.game.score += choice((100, 200, 300))
+            if current_cell.has_fruit:
+                current_cell.has_fruit = False
+                self.game.score += choice((100, 200, 300))
 
-        if self.game.maze.grid[self.cell[1]][self.cell[0]].has_energizer:
-            self.game.maze.grid[self.cell[1]][self.cell[0]].has_energizer = False
-            self.game.score += 50
-            self.game.activate_scare()
+            if current_cell.has_energizer:
+                current_cell.has_energizer = False
+                self.game.score += 50
+                self.game.activate_scare()
+
+            self.game.maze.collectibles_amount -= 1
+            if self.game.maze.collectibles_amount == 0:
+                self.game.next_level()

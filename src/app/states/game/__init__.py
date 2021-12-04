@@ -283,6 +283,9 @@ class Game(AppState):
         self.scare_score_for_ghost = Game.BASE_SCORE_FOR_GHOST_IN_SCARE_MODE
         self.scare_timer = self.app.FPS * GhostBase.SECONDS_FOR_SCARE_MODE
 
+    def next_level(self):
+        self.app.state = Game(self.app, self.score, self.lives)
+
     def game_over(self):
         """ Is called when pacman loses all lives """
         exit(0)
