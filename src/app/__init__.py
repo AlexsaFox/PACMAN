@@ -20,7 +20,7 @@ class App:
     WINDOW_CAPTION = "Pac-man"
     ANIMATION_FPS = 15
     FPS = 60
-    DEFAULT_SIZE = 100, 100
+    DEFAULT_SIZE = 1920, 1080
 
     # Default values for fields of App instance
     BG_COLOR = Color.BLACK
