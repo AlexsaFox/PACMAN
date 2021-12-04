@@ -17,6 +17,11 @@ if TYPE_CHECKING:
 class Game(AppState):
     BASE_SCORE_FOR_GHOST_IN_SCARE_MODE = 100
 
+    PAUSE_OVERLAY_BG = (0, 0, 0, 200)
+    PAUSE_OVERLAY_FG = (240, 240, 240)
+    PAUSE_OVERLAY_TEXT = "Game is paused"
+    PAUSE_OVERLAY_FONT = pygame.font.SysFont('Comic Sans MS', 72)
+
     INFO_PANEL_WIDTH_OF_SCREEN = 0.5
     INFO_PANEL_HEIGHT_OF_SCREEN = 0.1
     INFO_PANEL_BORDER_RADIUS = 30
@@ -157,6 +162,16 @@ class Game(AppState):
         for creature in creatures:
             creature.draw()
 
+        # Display pause overlay if game is paused
+        if self.is_paused:
+            overlay = pygame.Surface((sc_w, sc_h), pygame.SRCALPHA)
+            overlay.fill(Game.PAUSE_OVERLAY_BG)
+            self.app.screen.blit(overlay, (0, 0))
+
+            pause_text = Game.PAUSE_OVERLAY_FONT.render(Game.PAUSE_OVERLAY_TEXT, True, Game.PAUSE_OVERLAY_FG)
+            pos = pause_text.get_rect(center=(sc_w/2, sc_h/2))
+            self.app.screen.blit(pause_text, pos)
+
         # Display score and lives
         pygame.draw.rect(
             self.app.screen, 
@@ -180,7 +195,7 @@ class Game(AppState):
             border_top_right_radius=Game.INFO_PANEL_BORDER_RADIUS
         )
 
-        score_text = self.INFO_PANEL_FONT.render(f'{self.score} PTS', True, self.INFO_PANEL_FG_COLOR)
+        score_text = self.INFO_PANEL_FONT.render(f'{self.score} PTS', True, Game.INFO_PANEL_FG_COLOR)
         pos = score_text.get_rect(center=(sc_w * (1 - Game.INFO_PANEL_WIDTH_OF_SCREEN/2)/2, sc_h * (1 - Game.INFO_PANEL_HEIGHT_OF_SCREEN/2)))
         self.app.screen.blit(score_text, pos)
 
