@@ -13,6 +13,7 @@ class Theme:
         "floor": SingleDirectionAnimatedSprite,
         "fruit": SingleDirectionAnimatedSprite,
         "ghost_box_exit": TwoDirectionAnimatedSprite,
+        "life": SingleDirectionAnimatedSprite,
         "player": FourDirectionAnimatedSprite,
         "wall": SingleDirectionAnimatedSprite,
     }
@@ -107,3 +108,7 @@ class Theme:
     @property
     def wall(self) -> list[SingleDirectionAnimatedSprite]:
         return self._sprites.get("wall")
+
+    @property
+    def life(self) -> list[SingleDirectionAnimatedSprite]:
+        return self._sprites.get("life")

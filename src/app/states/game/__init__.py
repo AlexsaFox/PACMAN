@@ -3,6 +3,7 @@ from __future__ import annotations
 import pygame
 from math import ceil
 from typing import TYPE_CHECKING
+from random import choice, randrange
 from app.states import AppState
 from app.states.game.ghost import Blinky, Clyde, GhostBase, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
@@ -16,13 +17,28 @@ if TYPE_CHECKING:
 class Game(AppState):
     BASE_SCORE_FOR_GHOST_IN_SCARE_MODE = 100
 
+    INFO_PANEL_WIDTH_OF_SCREEN = 0.5
+    INFO_PANEL_HEIGHT_OF_SCREEN = 0.1
+    INFO_PANEL_BORDER_RADIUS = 30
+    INFO_PANEL_BORDER_WIDTH = 5
+    INFO_PANEL_BG_COLOR = (0, 0, 0)
+    INFO_PANEL_FG_COLOR = (240, 240, 240)
+    INFO_PANEL_FONT = pygame.font.SysFont('Comic Sans MS', 48)
+
+    LIFE_SPRITE_WIDTH = 60
+    LIFE_SPRITE_PADDING = 20
+
     def __init__(self, app):
         super().__init__(app)
 
         self.score = 0
         self.lives = 3
+        self.is_paused = False
         self.camera_center = 0, 0
 
+        self.life_sprite = choice(self.app.theme.life)
+        self.life_frame_idx = randrange(0, self.life_sprite.amount)
+        
         self.maze = Maze.classic(self)
         self.pacman = Pacman(game=self)
         self.ghosts = [
@@ -142,19 +158,62 @@ class Game(AppState):
             creature.draw()
 
         # Display score and lives
+        pygame.draw.rect(
+            self.app.screen, 
+            Game.INFO_PANEL_BG_COLOR,
+            (
+                sc_w * (1 - Game.INFO_PANEL_WIDTH_OF_SCREEN)/2, sc_h * (1 - Game.INFO_PANEL_HEIGHT_OF_SCREEN),
+                sc_w * Game.INFO_PANEL_WIDTH_OF_SCREEN,sc_h * Game.INFO_PANEL_HEIGHT_OF_SCREEN
+            ),
+            border_top_left_radius=Game.INFO_PANEL_BORDER_RADIUS,
+            border_top_right_radius=Game.INFO_PANEL_BORDER_RADIUS
+        )
+        pygame.draw.rect(
+            self.app.screen, 
+            Game.INFO_PANEL_FG_COLOR,
+            (
+                sc_w * (1 - Game.INFO_PANEL_WIDTH_OF_SCREEN)/2, sc_h * (1 - Game.INFO_PANEL_HEIGHT_OF_SCREEN),
+                sc_w * Game.INFO_PANEL_WIDTH_OF_SCREEN,sc_h * Game.INFO_PANEL_HEIGHT_OF_SCREEN + Game.INFO_PANEL_BORDER_WIDTH
+            ),
+            Game.INFO_PANEL_BORDER_WIDTH,
+            border_top_left_radius=Game.INFO_PANEL_BORDER_RADIUS,
+            border_top_right_radius=Game.INFO_PANEL_BORDER_RADIUS
+        )
+
+        score_text = self.INFO_PANEL_FONT.render(f'{self.score} PTS', True, self.INFO_PANEL_FG_COLOR)
+        pos = score_text.get_rect(center=(sc_w * (1 - Game.INFO_PANEL_WIDTH_OF_SCREEN/2)/2, sc_h * (1 - Game.INFO_PANEL_HEIGHT_OF_SCREEN/2)))
+        self.app.screen.blit(score_text, pos)
+
+        life_sprite_center = sc_w * (1 + Game.INFO_PANEL_WIDTH_OF_SCREEN/2)/2 - \
+                             self.lives * (Game.LIFE_SPRITE_WIDTH + Game.LIFE_SPRITE_PADDING)/2
+        life_frame = self.life_sprite.frame(self.life_frame_idx)
+        self.life_frame_idx = (self.life_frame_idx + 1) % self.life_sprite.amount
+        for _ in range(self.lives):
+            pos = life_frame.get_rect(center=(life_sprite_center, sc_h * (1 - Game.INFO_PANEL_HEIGHT_OF_SCREEN/2)))
+            life_sprite_center += Game.LIFE_SPRITE_WIDTH + Game.LIFE_SPRITE_PADDING
+            self.app.screen.blit(life_frame, pos)
         
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_w, pygame.K_UP]:
-                self.pacman.change_direction(Direction.N)
-            elif event.key in [pygame.K_a, pygame.K_LEFT]:
-                self.pacman.change_direction(Direction.E)
-            elif event.key in [pygame.K_s, pygame.K_DOWN]:
-                self.pacman.change_direction(Direction.S)
-            elif event.key in [pygame.K_d, pygame.K_RIGHT]:
-                self.pacman.change_direction(Direction.W)
+            if event.key == pygame.K_ESCAPE:
+                self.is_paused = not self.is_paused
+
+            # Do not process pacman inputs if game is paused
+            if not self.is_paused:
+                if event.key in [pygame.K_w, pygame.K_UP]:
+                    self.pacman.change_direction(Direction.N)
+                elif event.key in [pygame.K_a, pygame.K_LEFT]:
+                    self.pacman.change_direction(Direction.E)
+                elif event.key in [pygame.K_s, pygame.K_DOWN]:
+                    self.pacman.change_direction(Direction.S)
+                elif event.key in [pygame.K_d, pygame.K_RIGHT]:
+                    self.pacman.change_direction(Direction.W)
     
     def update(self):
+        # Do not process events if game is paused
+        if self.is_paused:
+            return
+            
         # Move pacman and camera to it's position
         self.pacman.move()
         sc_w, sc_h = self.app.screen.get_size()

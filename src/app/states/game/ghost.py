@@ -74,10 +74,12 @@ class GhostBase(MovingCreature):
     def scare_mode(self, activate: bool):
         if activate:
             self.mode = GhostMode.SCARE
+            self.frames_per_cell = self.frames_per_cell * 3/2
             self.sprite = choice(self.game.app.theme.enemy_scare)
             self.frame_idx = randrange(0, self.sprite.amount)
         else:
             self.mode = choice((GhostMode.CHASE, GhostMode.SCATTER))
+            self.frames_per_cell = self.frames_per_cell * 2/3
             self.sprite = self.regular_sprite
             self.frmae_idx = randrange(0, self.sprite.amount)
 
