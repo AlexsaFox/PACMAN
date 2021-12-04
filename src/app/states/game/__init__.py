@@ -4,7 +4,7 @@ import pygame
 from math import ceil
 from typing import TYPE_CHECKING
 from app.states import AppState
-from app.states.game.ghost import Blinky, Clyde, Inky, Pinky
+from app.states.game.ghost import Blinky, Clyde, GhostBase, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
 from utilities.direction import Direction
@@ -14,6 +14,8 @@ if TYPE_CHECKING:
 
 
 class Game(AppState):
+    BASE_SCORE_FOR_GHOST_IN_SCARE_MODE = 100
+
     def __init__(self, app):
         super().__init__(app)
 
@@ -29,6 +31,8 @@ class Game(AppState):
             Pinky(self),
             Clyde(self)
         ]
+        self.scare_timer = 0
+        self.scare_score_for_ghost = Game.BASE_SCORE_FOR_GHOST_IN_SCARE_MODE
 
     @property
     def blinky(self) -> Blinky:
@@ -48,7 +52,7 @@ class Game(AppState):
 
     @property
     def creatures(self) -> list[MovingCreature]:
-        return [self.pacman, self.blinky, self.inky, self.pinky, self.clyde]
+        return self.ghosts + [self.pacman]
 
     def draw(self):
         # Get cells in corners of screen
@@ -139,8 +143,6 @@ class Game(AppState):
 
         # Display score and lives
         
-
-
     def handle_event(self, event: pygame.event.Event):
         if event.type == pygame.KEYDOWN:
             if event.key in [pygame.K_w, pygame.K_UP]:
@@ -153,6 +155,7 @@ class Game(AppState):
                 self.pacman.change_direction(Direction.W)
     
     def update(self):
+        # Move pacman and camera to it's position
         self.pacman.move()
         sc_w, sc_h = self.app.screen.get_size()
         self.camera_center = (
@@ -160,5 +163,43 @@ class Game(AppState):
             self.camera_center[1] - sc_h/2 + self.pacman.sc_coords[1]
         )
 
+        # Move ghosts 
         for ghost in self.ghosts:
             ghost.move()
+
+        # If in scare mode, process it's timer
+        if self.scare_timer == 1:
+            self.scare_timer = 0
+
+            # If timer is over, convert all ghosts back to normal state
+            for ghost in self.ghosts:
+                ghost.scare_mode = False
+
+            # Make sure all ghosts still exist
+            for ghost_type in [Blinky, Inky, Pinky, Clyde]:
+                if not any(isinstance(ghost, ghost_type) for ghost in self.ghosts):
+                    self.ghosts += [ghost_type(self)]
+            
+        elif self.scare_timer > 0:
+            self.scare_timer -= 1
+
+        # Check collision of pacman with ghosts
+        for ghost in self.ghosts:
+            if self.pacman.check_collision(ghost):
+
+                # In scare mode
+                if self.scare_timer > 0:
+                    self.ghosts.remove(ghost)
+                    self.score += self.scare_score_for_ghost
+                    self.scare_score_for_ghost *= 2
+
+                # In regular mode
+                else:
+                    exit(0)
+
+    def activate_scare(self):
+        for ghost in self.ghosts:
+            ghost.scare_mode = True
+
+        self.scare_score_for_ghost = Game.BASE_SCORE_FOR_GHOST_IN_SCARE_MODE
+        self.scare_timer = self.app.FPS * GhostBase.SECONDS_FOR_SCARE_MODE
