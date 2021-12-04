@@ -5,6 +5,7 @@ import os
 from app.states import AppState
 from app.states.loading import Loading
 from app.states.game import Game
+from app.states.menu import Menu
 from app.themes import Theme
 from utilities.color import *
 
@@ -19,7 +20,7 @@ class App:
     WINDOW_CAPTION = "Pac-man"
     ANIMATION_FPS = 15
     FPS = 60
-    DEFAULT_SIZE = 1920, 900
+    DEFAULT_SIZE = 100, 100
 
     # Default values for fields of App instance
     BG_COLOR = Color.BLACK
@@ -31,7 +32,7 @@ class App:
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
         self.theme = Theme.load_theme(Theme.get_available()[1])
-        self.state: AppState = Game(self)
+        self.state: AppState = Menu(self)
         self.bg_color = App.BG_COLOR
 
     @property
