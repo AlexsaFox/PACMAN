@@ -76,7 +76,6 @@ class GhostBase(MovingCreature):
             self.mode = GhostMode.SCARE
             self.sprite = choice(self.game.app.theme.enemy_scare)
             self.frame_idx = randrange(0, self.sprite.amount)
-            print(self.sprite.amount, self.frame_idx)
         else:
             self.mode = choice((GhostMode.CHASE, GhostMode.SCATTER))
             self.sprite = self.regular_sprite
