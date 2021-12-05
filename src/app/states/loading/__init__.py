@@ -3,7 +3,6 @@ import sys
 import app as app_module
 from app.states import AppState
 from app.states.menu import Menu 
-pygame.font.init()
 from app.states.game import Game
 import os
 

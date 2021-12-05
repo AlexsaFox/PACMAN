@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import app
 import pygame
 from math import ceil
 from typing import TYPE_CHECKING
@@ -288,4 +289,4 @@ class Game(AppState):
 
     def game_over(self):
         """ Is called when pacman loses all lives """
-        exit(0)
+        self.app.state = app.states.menu.Menu(self.app)

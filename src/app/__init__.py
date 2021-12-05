@@ -26,7 +26,6 @@ class App:
     BG_COLOR = Color.BLACK
 
     def __init__(self):
-        pygame.init()
         self.running = True
         self.screen = pygame.display.set_mode(App.DEFAULT_SIZE, pygame.FULLSCREEN)
         pygame.display.set_caption(App.WINDOW_CAPTION)
