@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 import app as app_module
 from app.states import AppState
 from app.states.menu.scoreboard import load, save
@@ -177,7 +178,7 @@ class Menu(AppState):
             self.buttons = ["BACK"]
 
         elif self.selection == 2:
-            exit(0)
+            sys.exit()
         
         self.selection = 0
 
