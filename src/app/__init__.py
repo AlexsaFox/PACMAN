@@ -32,7 +32,7 @@ class App:
 
         self.username = 'anonymous'
         self.theme = Theme.load_theme(Theme.get_available()[1])
-        self.state: AppState = Menu(self)
+        self.state: AppState = Loading(self)
         self.bg_color = App.BG_COLOR
 
     @property

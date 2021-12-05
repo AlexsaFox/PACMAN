@@ -2,7 +2,7 @@ import pygame
 import os
 import app as app_module
 from app.states import AppState
-from app.states.menu.scoreboard import load
+from app.states.menu.scoreboard import load, save
 
 class Menu(AppState):
     BUTTON_SURFACE_COLOR = (0, 0, 0, 200)
@@ -43,11 +43,12 @@ class Menu(AppState):
         self.scoreboard_entries = load()[:Menu.SCOREBOARD_ENTRIES]
         if len(self.scoreboard_entries) == 0:
             self.scoreboard_entries = Menu.SCOREBOARD_DEFAULT
+            save(self.scoreboard_entries)
 
         self.mx_scoreboard_width = 0
         for i, entry in enumerate(self.scoreboard_entries):
             name, result = entry
-            text = Menu.SCOREBOARD_FONT.render(f'{i}. {name}: {result}', True, Menu.BUTTON_FG_INACTIVE)
+            text = Menu.SCOREBOARD_FONT.render(f'{1 + i}. {name}: {result}', True, Menu.BUTTON_FG_INACTIVE)
             self.mx_scoreboard_width = max(self.mx_scoreboard_width, text.get_width())
         self.mx_scoreboard_width += 2 * Menu.SCOREBOARD_PADDING
 
@@ -96,7 +97,7 @@ class Menu(AppState):
             height = scoreboard_top + Menu.SCOREBOARD_PADDING
             for i, entry in enumerate(self.scoreboard_entries):
                 name, result = entry
-                text = Menu.SCOREBOARD_FONT.render(f'{i}. {name}: {result}', True, Menu.BUTTON_FG_INACTIVE)
+                text = Menu.SCOREBOARD_FONT.render(f'{1 + i}. {name}: {result}', True, Menu.BUTTON_FG_INACTIVE)
                 pos = text.get_rect(topleft=((sc_w - self.mx_scoreboard_width)/2 + Menu.SCOREBOARD_PADDING, height))
                 self.app.screen.blit(text, pos)
                 height += Menu.SCOREBOARD_FONT.get_height() + Menu.SCOREBOARD_BETWEEN_PADDING

@@ -6,6 +6,7 @@ from math import ceil
 from typing import TYPE_CHECKING
 from random import choice, randrange
 from app.states import AppState
+from app.states.menu.scoreboard import save_result
 from app.states.game.ghost import Blinky, Clyde, GhostBase, Inky, Pinky
 from app.states.game.maze import Maze, MazeCell
 from app.states.game.pacman import Pacman
@@ -289,4 +290,5 @@ class Game(AppState):
 
     def game_over(self):
         """ Is called when pacman loses all lives """
+        save_result(self.app.username, self.score)
         self.app.state = app.states.menu.Menu(self.app)
