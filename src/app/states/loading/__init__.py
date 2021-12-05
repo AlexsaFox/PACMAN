@@ -2,8 +2,7 @@ import pygame
 import sys
 import app as app_module
 from app.states import AppState
-from app.states.menu import Menu 
-from app.states.game import Game
+from app.states.menu import Menu
 import os
 
 
@@ -51,7 +50,10 @@ class Loading(AppState):
                 self.txt_surface = myfont.render(self.text, True, self.color) 
         if self.progress>100:     
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                self.app.state=Game(self.app)
+                if self.text == '':
+                    self.text = 'anonymous'
+                self.app.username = self.text
+                self.app.state=Menu(self.app)
         pass
 
     def draw(self):

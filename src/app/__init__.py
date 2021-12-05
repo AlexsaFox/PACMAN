@@ -30,6 +30,7 @@ class App:
         self.screen = pygame.display.set_mode(App.DEFAULT_SIZE, pygame.FULLSCREEN)
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
+        self.username = 'anonymous'
         self.theme = Theme.load_theme(Theme.get_available()[1])
         self.state: AppState = Menu(self)
         self.bg_color = App.BG_COLOR

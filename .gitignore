@@ -13,3 +13,6 @@ build/
 
 # Temporary files for testing purposes
 levels/test.csv
+
+# Personal data 
+scoreboard.dat
