@@ -1,0 +1,18 @@
+# VSCode settings folder
+.vscode/
+
+# Python cache
+__pycache__/
+
+# Virtual environment 
+venv/
+
+# Pyinstaller
+main.spec
+build/
+
+# Temporary files for testing purposes
+levels/test.csv
+
+# Personal data 
+scoreboard.dat
