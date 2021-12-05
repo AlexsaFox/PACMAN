@@ -4,16 +4,16 @@ import os
 
 from app.states import AppState
 from app.states.loading import Loading
-from app.states.game import Game
 from app.states.menu import Menu
+from app.states.game import Game
 from app.themes import Theme
-from utilities.color import *
 
 
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
     return os.path.join(relative)
+
 
 class App:
     # Constants
@@ -23,7 +23,7 @@ class App:
     DEFAULT_SIZE = 1920, 1080
 
     # Default values for fields of App instance
-    BG_COLOR = Color.BLACK
+    BG_COLOR = (20, 23, 42)
 
     def __init__(self):
         self.running = True
@@ -31,7 +31,7 @@ class App:
         pygame.display.set_caption(App.WINDOW_CAPTION)
 
         self.username = 'anonymous'
-        self.theme = Theme.load_theme(Theme.get_available()[1])
+        self.theme = Theme.load_theme(Theme.get_available()[0])
         self.state: AppState = Loading(self)
         self.bg_color = App.BG_COLOR
 
